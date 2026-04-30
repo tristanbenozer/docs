@@ -1,0 +1,46 @@
+---
+title: "Bring Your Own Key"
+description: "Hydra uses your Anthropic API key for all AI workflows. Your code never passes through Hydra's API accounts."
+---
+
+Hydra requires an Anthropic API key to operate. Every workflow -- Discovery, Audit, Fix, Task, Improve, PR Review, and Learn -- runs against your own key. Hydra charges a platform subscription for access. It does not proxy your requests or mark up AI compute.
+
+## What BYOK means in practice
+
+**Your code never passes through Hydra's API accounts.** All LLM calls go from Hydra's infrastructure to Anthropic using your credentials. Nothing about your codebase appears in Hydra's API usage logs.
+
+**Full visibility in your own console.** Every workflow run appears in your Anthropic console as normal API usage. You can see exactly what each run cost, which models were used, and when -- without asking Hydra for a report.
+
+**Your rate limits and policies apply.** If your organization has an Anthropic enterprise agreement with specific data handling terms, those terms apply to all Hydra calls. Your spend alerts, usage caps, and compliance posture carry over automatically.
+
+## Setting up your key
+
+<Steps>
+  <Step title="Create a key at console.anthropic.com">
+    Sign in to [console.anthropic.com](https://console.anthropic.com), go to **API Keys**, and create a new key. Use a dedicated key for Hydra rather than a shared team key -- this keeps Hydra's usage clearly separated and easy to rotate independently.
+  </Step>
+  <Step title="Add it to Hydra">
+    In the Hydra dashboard, go to **Settings > API Keys** and paste your key. Hydra stores it encrypted at rest.
+  </Step>
+  <Step title="Verify">
+    Run a small workflow (Learn costs $0.50-1) to confirm the key is working and usage is appearing in your Anthropic console.
+  </Step>
+</Steps>
+
+<Warning>
+Do not use a key with billing limits set too low. Discovery costs $5-10 and a full audit on a large codebase can reach $35. Set your Anthropic spend limit above your expected monthly workflow volume.
+</Warning>
+
+## Costs
+
+All AI compute appears on your Anthropic bill, not your Hydra invoice. See [Workflow Costs](/reference/workflow-costs) for per-workflow ranges.
+
+## For compliance and security teams
+
+The BYOK model is the answer to the question "where does our code go?" -- it goes to Anthropic, under your account, under your agreement, exactly as if you had called the API yourself. Hydra never sees the raw API responses. It only receives and acts on the structured outputs.
+
+For teams evaluating Hydra against internal security requirements: the data flow is your application code to Anthropic (your account) to Hydra (structured finding data only). No raw code content is stored by Hydra beyond what is needed to execute the current workflow.
+
+## Multi-model support
+
+Hydra currently runs on Anthropic models. Multi-model support via the same BYOK mechanism is on the roadmap for teams with existing OpenAI or other provider contracts.

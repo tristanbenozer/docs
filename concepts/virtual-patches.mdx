@@ -1,0 +1,59 @@
+---
+title: "Virtual Patches"
+description: "How Learn improvements are injected into every subsequent audit at runtime, without a code deployment."
+---
+
+A virtual patch is an improvement to Hydra's analysis that is applied at runtime -- injected into the audit pipeline when the audit starts, not compiled into the codebase. The next audit after a virtual patch is accepted is immediately smarter. No deployment required.
+
+## How it works
+
+When [Learn](/workflows/learn) proposes an improvement and you approve it, Hydra stores the improvement as an active virtual patch for your repo (or globally, for scanner pattern contributions).
+
+At the start of every subsequent audit:
+
+1. Hydra loads all active virtual patches for the repo
+2. Patches are injected into the appropriate stage of the analysis pipeline:
+   - `scanner_pattern` patches are added to the scanner's pattern set before the scan runs
+   - `scanner_pattern_disable` patches suppress a specific pattern before the scan runs
+   - `scanner_pattern_severity` patches override a pattern's severity before the scan runs
+   - `skill_item` patches are appended to the relevant global skill file before agent prompts are built
+   - `repo_skill` patches are appended to the repo-specific skill before agent prompts are built
+3. The audit runs with all patches active
+
+No source code changes. No deployment. The improvement is live.
+
+## Why this matters
+
+The alternative to virtual patches is a pull request to the Hydra codebase for every improvement -- code review, merge, deployment, rollout. For a system designed to improve continuously from real-world usage, that cycle is too slow.
+
+Virtual patches decouple the improvement loop from the deployment cycle. Learn can run after every audit. Accepted improvements are active immediately. The system gets smarter on the same day you run Learn.
+
+## Patch types
+
+| Type | What it does | Where it injects |
+|---|---|---|
+| `scanner_pattern` | Adds a new regex pattern to the deterministic scanner | Pre-scan |
+| `scanner_pattern_disable` | Suppresses an existing pattern generating false positives | Pre-scan |
+| `scanner_pattern_severity` | Overrides the severity of an existing pattern | Pre-scan |
+| `skill_item` | Adds an analysis bullet to a global skill file | Pre-prompt build |
+| `repo_skill` | Adds an analysis bullet to a repo-specific skill file | Pre-prompt build |
+
+## Managing patches
+
+Active patches are visible in **Repository Settings > Learn** with status `active`. From there you can:
+- Review what each patch does
+- Deactivate a patch without deleting it
+- See which Learn run proposed the patch
+
+Patches with status `pending` have been proposed by Learn but not yet reviewed.
+
+## Global contributions
+
+Scanner pattern patches can optionally be contributed to the global pattern library, making them available to all Hydra tenants. The contribution sends only mechanical fields -- regex, severity, file scope, and category. No prose, no finding text, and no codebase content crosses the tenant boundary.
+
+See [Learn: Global contributions](/workflows/learn#global-contributions) for details.
+
+## Related
+
+- [Learn](/workflows/learn) -- the workflow that generates virtual patches
+- [Audit](/workflows/audit) -- the workflow virtual patches make smarter

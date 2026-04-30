@@ -1,0 +1,53 @@
+---
+title: "Workflow Costs"
+description: "Cost and time estimates for every Hydra workflow. All AI compute bills to your Anthropic API key."
+---
+
+Hydra uses a BYOK (Bring Your Own Key) model. All AI compute bills directly to your Anthropic API key. Hydra does not mark up API costs or take a cut of compute spend.
+
+The estimates below reflect typical usage. Actual costs vary based on codebase size, complexity, and the number of findings processed.
+
+## Workflow cost table
+
+| Workflow | Typical cost | Typical time | Notes |
+|---|---|---|---|
+| **Discovery** | $5-10 | 10-20 min | One-time per repo; re-run after major structural changes |
+| **Audit** | $1-35 | 15-45 min | Range reflects codebase size; most repos fall in the $5-15 range |
+| **Fix** | $1-10 | 5-15 min | Depends on fix complexity and number of revision cycles |
+| **Task** | $1-10 | 5-15 min | Refinement step + same gauntlet as Fix |
+| **Improve** | $7-11 | ~11 min | Full six-agent loop on code quality |
+| **Improve Lite** | $1-2 | 30-60 sec | Single Opus call; architectural analysis only |
+| **PR Review (Scanner)** | ~$1-2 per PR | Seconds | Deterministic; no LLM cost for analysis |
+| **PR Review (LLM)** | ~$1-2.50 per PR | Minutes | Full LLM analysis on the diff |
+| **Learn** | ~$0.50-1 | 1-3 min | Reads findings, skills, and scanner patterns; proposes improvements |
+
+## Cost drivers
+
+**Audit** is the most variable workflow. Cost scales with:
+- Total lines of code scanned
+- Number of files passed to agent groups
+- Whether the Opus meta-review escalates findings for deeper analysis
+
+**Fix and Task** costs scale with:
+- Complexity of the change (number of files touched, interdependencies)
+- Whether the reviewer agent requests a revision (adds one revision loop)
+- Whether the scanner quality loop needs to iterate
+
+**PR Review** in LLM mode costs scale with diff size and the number of skill files loaded based on what changed.
+
+## Controlling costs
+
+<Tip>
+Set a monthly spend limit on your Anthropic API key at console.anthropic.com. If Hydra encounters a budget limit mid-workflow, the run will fail rather than silently truncate.
+</Tip>
+
+- **Audit frequency**: Most teams run full audits weekly or after major merges, not on every push
+- **Fix vs Task**: Fix is cheaper because the finding is already scoped; Task adds a refinement step
+- **PR Review mode**: Use Scanner mode for high-volume repos; LLM mode for repos where depth matters
+- **Improve vs Improve Lite**: Use Improve Lite (~$1-2) before committing to a full Improve run (~$7-11)
+
+## Related
+
+- [BYOK](/concepts/byok) -- how your API key connects and what data it sees
+- [Audit](/workflows/audit) -- the most cost-variable workflow
+- [PR Review](/workflows/pr-review) -- per-PR cost breakdown

@@ -1,0 +1,70 @@
+---
+title: "Quick Start"
+description: "Install Hydra, run your first audit, and close your first Linear ticket automatically. Under 10 minutes."
+---
+
+## 1. Create your account
+
+Sign in at [hydra.iru.dev](https://hydra.iru.dev) using your GitHub account.
+
+## 2. Install the GitHub App
+
+After signing in, install the Hydra GitHub App on the organization and repositories you want Hydra to monitor. Hydra needs read and write access to open pull requests and post check results.
+
+## 3. Add your Anthropic API key
+
+Go to **Settings > API Keys** and add your Anthropic API key. Every Hydra workflow runs against your own key.
+
+<Note>
+All AI compute bills directly to your Anthropic account. Hydra charges a platform subscription only. [Learn why](/concepts/byok).
+</Note>
+
+## 4. Add a repository
+
+Go to **Repositories** and click **Add repository**. Select the repo and configure the branch you want Hydra to monitor.
+
+## 5. Discovery runs automatically
+
+Hydra immediately starts Discovery on the repository. It reads the entire codebase, builds an application profile, and generates the `.hydra/` documentation directory. This runs once per repository and costs approximately $5-10 on your Anthropic key.
+
+Discovery opens a pull request to your repo that adds the `.hydra/` directory. Merging it activates CLAUDE.md injection for your team.
+
+<Info>
+Discovery takes 10-20 minutes depending on codebase size. You will see progress in the dashboard. Everything else waits until Discovery completes.
+</Info>
+
+## 6. Run your first audit
+
+Once Discovery completes, click **Run Audit**. The audit runs a three-step analysis across six parallel agent groups and returns a prioritized list of findings. Each finding includes severity, effort estimate, risk rating, and a change plan.
+
+The audit costs $1-35 depending on codebase size. Most mid-sized repos land between $3-8.
+
+## 7. Fix your first finding
+
+Select a finding and click **Fix**. Hydra will:
+
+1. Create a Linear ticket with full context
+2. Run the 11-step quality gauntlet
+3. Open a pull request
+4. Close the Linear ticket on merge
+
+<Check>
+Your first autonomous fix is running. No further action required until you review the PR.
+</Check>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="How the audit works" icon="magnifying-glass" href="/workflows/audit">
+    The three-step analysis, the six agent groups, and what findings contain.
+  </Card>
+  <Card title="The fix gauntlet" icon="shield-check" href="/concepts/fix-gauntlet">
+    The 11 quality gates every fix passes before a PR opens.
+  </Card>
+  <Card title="BYOK explained" icon="key" href="/concepts/byok">
+    Why you bring your own key and what it means for your data.
+  </Card>
+  <Card title="Workflow costs" icon="receipt" href="/reference/workflow-costs">
+    Per-workflow cost ranges for your Anthropic bill.
+  </Card>
+</CardGroup>

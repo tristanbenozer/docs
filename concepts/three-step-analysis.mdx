@@ -1,0 +1,57 @@
+---
+title: "Three-Step Analysis"
+description: "How Hydra structures every audit: pre-flight meta-prompting, parallel agent groups, and Opus-level meta-review."
+---
+
+Every Hydra audit runs three sequential steps before a finding is written. The steps are not configurable -- each one is a prerequisite for the next.
+
+## Step 1: Pre-flight (Meta-prompting)
+
+Before any analysis agent runs, Hydra calls a Sonnet model to generate a **repo-specific analysis protocol** for this audit.
+
+The pre-flight call reads:
+- Your Discovery profile (conventions, stack, architecture, key paths)
+- The repo-specific skill file (if one exists)
+- Recent benchmark trends for this repo
+
+It outputs a structured protocol that is prepended to every agent's prompt in Step 2. This means the six audit agents are not running generic checklists -- they are running checklists that have been tuned to your specific codebase before the session begins.
+
+The pre-flight step is always on. It adds a small fixed cost but eliminates false positives that come from generic analysis.
+
+## Step 2: Six Agent Groups
+
+Six parallel agent groups analyze the codebase simultaneously. Each group owns a distinct concern:
+
+| Group | Focus areas |
+|---|---|
+| **Security** | Auth, access control, hardening, privacy, compliance |
+| **Code Quality** | Dead code, naming, structural refactors, AI usage patterns, test coverage |
+| **Reliability** | Performance, concurrency, resilience, cost footprint |
+| **API + Data** | Contracts, schema evolution, database patterns, input validation, multi-tenancy |
+| **Ops** | Dependencies, config management, observability, logging, feature flags |
+| **UX** | Accessibility, i18n, error UX, frontend performance, bundle size |
+
+Each agent group:
+- Receives the pre-flight protocol from Step 1
+- Receives the relevant global skill file for its domain
+- Runs against the full codebase
+
+The six groups run in parallel. Combined output is a raw finding pool.
+
+## Step 3: Opus Meta-Review
+
+After the six agent groups complete, an Opus-class model reviews the raw finding pool.
+
+The meta-review does four things:
+1. **Deduplicates** findings that multiple agents identified
+2. **Resolves conflicts** when agents disagree on severity
+3. **Applies a novelty filter** -- any finding that could have been caught by the scanner or by earlier deterministic steps is suppressed
+4. **Requires a novelty rationale** -- every finding that passes must include a sentence explaining why it was not caught by pattern-based analysis
+
+The novelty requirement is what distinguishes Hydra's LLM findings from pattern matchers. If an Opus-level model cannot articulate why a finding requires judgment to identify, the finding does not ship.
+
+## Related
+
+- [Audit](/workflows/audit) -- the workflow this analysis runs inside
+- [Discovery](/workflows/discovery) -- what builds the profile the pre-flight step reads
+- [Virtual Patches](/concepts/virtual-patches) -- how Learn improvements inject into this pipeline

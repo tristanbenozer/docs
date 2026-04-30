@@ -1,0 +1,80 @@
+---
+title: "Fix"
+description: "Hydra executes the fix, opens a pull request, and closes the Linear ticket. No human in the critical path."
+---
+
+Fix takes a finding from an audit and resolves it autonomously. It creates a Linear ticket, runs the fix through an 11-step quality gauntlet, opens a pull request, and closes the ticket on merge.
+
+**Cost:** ~$1-10 on your Anthropic key. **Time:** 5-15 minutes depending on complexity.
+
+## What Fix targets
+
+Fix is designed for bugs and security issues -- the category where functionality does not change. This makes AI validation straightforward: establish what the tests expected before the change, make the fix, confirm nothing changed or broke.
+
+Fix runs through the same quality gauntlet as [Task](/workflows/task). Both workflows use identical quality controls.
+
+## The quality gauntlet
+
+Every fix runs 11 steps before a pull request opens. None of them are skippable.
+
+<Steps>
+  <Step title="Isolated Git worktree">
+    The fix runs in an isolated Git worktree. No risk to your main branch during execution.
+  </Step>
+  <Step title="Baseline tests established">
+    Hydra captures which tests exist and what they expect before any code changes. This is the baseline the regression gate compares against.
+  </Step>
+  <Step title="Agent executes fix">
+    The fix agent runs against the codebase using the context from Discovery -- conventions, architecture, and patterns specific to this repository.
+  </Step>
+  <Step title="Diff size guard">
+    Fixes that exceed 20 changed files or 2,000 total lines are rejected. Scope control is enforced automatically, not left to the agent's judgment.
+  </Step>
+  <Step title="Regression gate">
+    Baseline tests must still pass after the fix. If any test that was passing before the change now fails, the run aborts.
+  </Step>
+  <Step title="Build verification">
+    The project must still build cleanly after the fix.
+  </Step>
+  <Step title="Format and lint">
+    Changed files are auto-formatted and linted. The fix follows the project's existing formatting and linting configuration.
+  </Step>
+  <Step title="Scanner quality loop">
+    The fix itself is run through Hydra's scanner. Hydra reviews its own work before the PR opens. This loop runs up to 2 iterations with cycle detection to prevent infinite loops.
+  </Step>
+  <Step title="Reviewer agent">
+    A second LLM agent reviews the fix independently. It can approve, request revision, or reject. If it requests revision, one revision attempt runs before the fix is escalated.
+  </Step>
+  <Step title="Post-fix audit">
+    A full audit runs on the changed files to verify no new issues were introduced by the fix.
+  </Step>
+  <Step title="Pull request opened">
+    The PR is opened with the fix, the change plan, any accepted risks, and a testing plan. The Linear ticket is referenced in the PR description.
+  </Step>
+</Steps>
+
+## Fix breadcrumbs
+
+Before any code change, Hydra commits a `.hydra/fixes/{ref}/` directory into the worktree containing the original finding, the change plan, and machine-readable metadata. This directory ships as part of the merged pull request permanently. Every merged Hydra fix is a self-documenting record in version control.
+
+## When the gauntlet cannot complete
+
+If a fix fails after a revision attempt, Hydra surfaces an explicit escalation signal with a specific reason and suggested next step: retry with a stronger model, split the finding into smaller scope, or route to a human reviewer.
+
+Hydra does not auto-escalate. Control returns to you with a clear explanation of what failed and why.
+
+## Linear integration
+
+Fix requires a connected Linear workspace. When Fix is triggered:
+
+1. A Linear ticket is created with the finding title, description, severity, and change plan
+2. The ticket is set to **In Progress** while the fix executes
+3. The ticket is closed automatically when the pull request merges
+
+If the PR is closed without merging, the ticket returns to **Open**.
+
+## Related
+
+- [The Fix Gauntlet](/concepts/fix-gauntlet) -- detailed explanation of each quality gate
+- [Task](/workflows/task) -- run a fix on a plain-English directive instead of a detected finding
+- [Finding Fields](/reference/finding-fields) -- what information a finding carries into the fix

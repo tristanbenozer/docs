@@ -1,0 +1,70 @@
+---
+title: "Learn"
+description: "Analyzes your findings and proposes improvements that make every future audit sharper -- without a code deployment."
+---
+
+Learn reads your open findings, dismissed improvements, benchmark trends, and existing analysis skills, then proposes targeted improvements to Hydra's analysis for your codebase. Improvements are applied as virtual patches at runtime -- the next audit is smarter the moment Learn runs, with no code deployment required.
+
+**Cost:** ~$0.50-1. **Time:** 1-3 minutes.
+
+## What Learn produces
+
+Learn proposes improvements in five categories:
+
+| Type | Description |
+|---|---|
+| `scanner_pattern` | New regex pattern for the deterministic scanner -- zero LLM cost on future audits |
+| `scanner_pattern_disable` | Suppress an existing pattern that is generating false positives in your codebase |
+| `scanner_pattern_severity` | Override the severity of an existing pattern for your codebase |
+| `skill_item` | New analysis bullet for a global skill file -- applies to all repos |
+| `repo_skill` | New analysis bullet for a repo-specific skill file |
+
+## How Learn works
+
+Before running the main Learn agent, a refinement step generates a targeted analysis strategy based on which tools have the most open findings and what benchmark trends suggest. This strategy is prepended to the main Learn prompt.
+
+The Learn agent is given:
+
+- Up to 80 open findings from your repo, sorted by severity
+- Dismissed findings -- so it does not re-propose things you have already rejected
+- Prior Learn outputs that were rejected
+- Prior Learn outputs that were accepted
+- Current skill file content for relevant tools
+- Repo-specific skills
+- Current scanner patterns
+- Discovery profile and conventions
+
+The agent's framing of its own job: make every future audit smarter than the last by identifying what class of problems the current analysis is systematically missing.
+
+## Virtual patches
+
+Accepted Learn improvements are applied as virtual patches -- injected into every subsequent audit at runtime. They do not require changes to Hydra's codebase or a deployment. The improvement is active immediately.
+
+See [Virtual Patches](/concepts/virtual-patches) for a full explanation of the mechanism.
+
+## Global contributions
+
+Scanner pattern improvements can optionally be contributed to the global pattern library, making them available to all Hydra tenants. When you opt into global contribution:
+
+- Only mechanical fields are sent: the regex, severity, file scope, and category
+- A separate model call on Hydra's side authors all human-readable content from those fields
+- No code, no finding text, and no codebase content from your tenant crosses the boundary
+
+Global contributions are opt-in and configurable per-pattern.
+
+## Running Learn
+
+Learn can be triggered manually from the repository dashboard after any audit. It can also be scheduled to run automatically after each audit completes.
+
+Improvements appear in **Repository Settings > Learn** with a status of `pending`. Review and approve or dismiss each one. Approved improvements become `active` immediately.
+
+## Kaizen
+
+Kaizen is a companion CLI service for continuous autonomous improvement loops. It runs as a daemon alongside the hosted product, using Claude Code CLI directly. Give it a focus area and a budget, or let it self-direct. It runs improvement loops using Git worktrees for isolation until the exit condition is met.
+
+Exit conditions: budget reached, three consecutive marginal iterations (diminishing returns), or nothing new to improve in the focus area.
+
+## Related
+
+- [Virtual Patches](/concepts/virtual-patches) -- how Learn improvements are applied without deployment
+- [Audit](/workflows/audit) -- the workflow Learn makes smarter

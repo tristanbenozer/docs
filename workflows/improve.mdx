@@ -1,0 +1,63 @@
+---
+title: "Improve"
+description: "Two modes: code quality execution across six agent groups, or fast architectural restructuring via a single Opus call."
+---
+
+Improve has two distinct modes for different decisions. Improve runs a full agent loop for code quality execution. Improve Lite runs a single Opus call for architectural analysis.
+
+## Improve
+
+**Cost:** ~$7-11. **Time:** ~11 minutes.
+
+Improve targets code quality -- not bugs, not security issues. Dead code removal, naming conventions, structural refactors, documentation gaps, dependency cleanup. The full six-agent loop runs with a code quality prompt template instead of the standard audit template.
+
+Improve findings use `I-` prefixes to distinguish them from audit findings. Each improvement goes through the standard improvement pipeline: triage, agents, consolidation, validation, persist.
+
+### What Improve produces
+
+- A prioritized list of code quality improvements, each scoped and estimated
+- For each selected improvement: a pull request with the change, a change plan, a testing plan, and a post-improvement audit to verify no regressions
+- Linear ticket created and closed on merge
+
+### When to use Improve
+
+Use Improve when you want to address technical debt systematically. Improve operates on code quality -- things that work but make the codebase slower to operate in. Fix operates on bugs and security issues. They do not overlap.
+
+## Improve Lite
+
+**Cost:** ~$1-2. **Time:** 30-60 seconds.
+
+Improve Lite is a single Opus call over your repo profile, existing findings, and a key file index. It returns 5-10 high-level architectural restructurings -- not code changes, but decisions about structure.
+
+### The leverage field
+
+Every Improve Lite recommendation includes a **leverage** field: one sentence explaining how many existing audit findings or future bugs this restructuring would resolve or prevent at the design level.
+
+```
+Leverage: Addressing this would collapse 12 existing api-data findings about inconsistent
+validation patterns into a single contract enforced at the boundary, and prevent the category
+from recurring.
+```
+
+### Restructuring categories
+
+Improve Lite works across seven categories:
+
+| Category | Description |
+|---|---|
+| Structural split | A component doing too many things that should be separated |
+| Responsibility misplacement | Logic in the wrong layer of the stack |
+| Data flow | Data moving through the system in ways that create coupling or confusion |
+| Extension point | A place where the design should be open for extension but is closed |
+| Consolidation | Duplicate logic or patterns that should be unified |
+| Dead subsystem | Code that is no longer used and should be removed |
+| Product architecture gap | A structural decision that does not match how the product actually works |
+
+### When to use Improve Lite
+
+Use Improve Lite before a sprint planning session or a refactor discussion. It gives you a fast, Opus-level read on what is structurally wrong with the codebase and why each issue is high-leverage -- without committing to execution time or cost.
+
+## Related
+
+- [Kaizen](/workflows/learn#kaizen) -- continuous autonomous improvement loops via the companion CLI
+- [Audit](/workflows/audit) -- full analysis to find bugs, security issues, and code quality problems
