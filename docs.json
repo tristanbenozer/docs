@@ -1,0 +1,66 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Hydra",
+  "colors": {
+    "primary": "#a3e635",
+    "light": "#a3e635",
+    "dark": "#84cc16"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Workflows",
+            "pages": [
+              "workflows/discovery",
+              "workflows/audit",
+              "workflows/fix",
+              "workflows/task",
+              "workflows/improve",
+              "workflows/pr-review",
+              "workflows/learn"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              "concepts/byok",
+              "concepts/three-step-analysis",
+              "concepts/fix-gauntlet",
+              "concepts/virtual-patches"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/workflow-costs",
+              "reference/finding-fields",
+              "reference/hydra-directory"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://hydra.iru.dev"
+    }
+  }
+}
