@@ -44,6 +44,7 @@
           {
             "group": "Reference",
             "pages": [
+              "reference/plans-pricing",
               "reference/workflow-costs",
               "reference/finding-fields",
               "reference/hydra-directory"

@@ -1,0 +1,174 @@
+---
+title: "Plans and Pricing"
+description: "Hydra pricing is per-editor seat. Viewers are always free. Fix billing is separate from the seat price and depends on whether you use BYOK or hosted compute."
+---
+
+## Plans
+
+Hydra has four plans. The right plan depends on how many workflows your team needs and how large your organization is.
+
+| Plan | Price | Who it's for |
+|---|---|---|
+| Free | $0 | Individual developers evaluating Hydra |
+| Pro | $25 / editor / month | Teams that need Fix, Task, and Learn |
+| Team | $32 / editor / month | Teams that also need Govern and Improve |
+| Enterprise | Custom | Organizations requiring SSO, audit logs, and compliance |
+
+Prices above are billed monthly. Annual billing is available on Pro and Team at a discount.
+
+---
+
+## What's included on each plan
+
+### Free
+
+- 5 fixes per month
+- 1 repository
+- GitHub App (webhooks, PR creation, check runs)
+- Linear integration
+- Jira integration
+- Ticket creation on fix
+- Unlimited Viewer seats
+- Workflows available: Discovery, Audit (read-only)
+- Model: open-source (Qwen Coder-Next). No Anthropic key required.
+- Support: community
+
+Free fixes run on Hydra's hosted open-source model. You do not need an Anthropic API key to use the free plan.
+
+### Pro -- $25 / editor / month
+
+Everything in Free, plus:
+
+- Unlimited fixes (BYOK or hosted)
+- Unlimited repositories
+- All 7 workflows: Discovery, Audit, Fix, Task, Learn, Improve, PR Review
+- Author analytics (your own data only)
+- Fix billing: BYOK (unlimited, $0 to Hydra) or hosted ($1.50 / fix via AWS Bedrock)
+- Support: email
+
+### Team -- $32 / editor / month
+
+Everything in Pro, plus:
+
+- Govern -- PR Review runs automatically on every pull request
+- Improve -- full code quality workflows
+- Improve Lite -- architectural recommendations
+- Team admin and user management
+- Analytics across all authors (not just your own)
+- Audit runner permissions (admins can grant specific editors the right to trigger audits)
+- Role-based access: Viewer / Editor / Admin
+- Support: priority + dedicated Slack channel
+
+### Enterprise -- Custom pricing, annual contract
+
+Everything in Team, plus:
+
+- SSO / SAML
+- Custom RBAC and granular permissions
+- Audit logs
+- Analytics exports (CSV and API)
+- AWS Marketplace billing
+- Custom fix pricing (negotiated rate)
+- SOC 2 Type II
+- Data residency options
+- Dedicated support and SLA
+- Dedicated onboarding
+
+Contact us to discuss Enterprise pricing.
+
+---
+
+## Seats: Viewers, Editors, and Admins
+
+Hydra uses three roles. Only Editors and Admins count as paid seats.
+
+### Viewer (free on all plans)
+
+- Sees findings, audit results, and workflow status
+- Cannot click Fix, run audits, or manage users
+- Does not count as a paid seat
+- Unlimited Viewers on every plan
+
+### Editor (paid seat)
+
+- Can trigger Fix, Task, Improve, and other workflows
+- Author analytics are scoped to their own activity
+- Counts as one paid seat
+
+### Admin (paid seat)
+
+- Everything an Editor can do
+- Manages users: grants and revokes Editor vs. Viewer status
+- Manages billing and plan settings
+- Counts as one paid seat
+
+**Your seat count** is the number of Editors plus the number of Admins. Viewers are free and do not affect your bill.
+
+---
+
+## Fix billing
+
+Fix billing is separate from your seat price. How it works depends on whether you use BYOK or hosted compute.
+
+### BYOK (Bring Your Own Key)
+
+Available on Pro and Team. You connect your Anthropic API key in Settings. All Fix, Task, Improve, and other AI workflow calls go directly from Hydra to Anthropic using your credentials.
+
+- Hydra charges $0 for AI compute. Your seat price is the only charge from Hydra.
+- You pay Anthropic directly at your account's API rates.
+- Typical cost per fix: $0.50 -- $1.50 on your Anthropic key, depending on codebase complexity.
+- No markup. No proxy. Your code goes to Anthropic, not through Hydra's API accounts.
+
+See [Bring Your Own Key](/concepts/byok) for setup instructions.
+
+### Hosted compute
+
+Available on Pro and Team for teams that prefer not to manage an Anthropic key.
+
+- $1.50 per fix, billed to Hydra.
+- Runs on AWS Bedrock (Claude via Amazon). No Anthropic account required.
+- Appears as a usage line item on your Hydra invoice alongside your seat charge.
+
+### Free plan
+
+The free plan includes 5 fixes per month on Hydra's hosted open-source model. No Anthropic key required. No per-fix charge.
+
+---
+
+## Common billing questions
+
+**When am I charged?**
+
+Seat charges are monthly, on your billing anniversary date. Hosted fix charges accumulate during the month and appear on the same invoice.
+
+**What happens if I add a new Editor mid-month?**
+
+New Editor seats are prorated from the day they are added to the end of your current billing period.
+
+**Can I have more Viewers than Editors?**
+
+Yes. Viewers are unlimited and free on every plan. There is no cap.
+
+**Can I switch between BYOK and hosted?**
+
+Yes. You can toggle between BYOK and hosted in Settings at any time. Switching takes effect on the next fix run.
+
+**Is there an overage charge if I run more than 5 fixes on the free plan?**
+
+No overage. Fix workflows are blocked once you reach the monthly limit. Upgrade to Pro or Team to remove the limit.
+
+**How do I upgrade my plan?**
+
+Go to Settings > Billing in your Hydra dashboard to upgrade, change seat count, or switch billing periods.
+
+**Do I need a credit card for the free plan?**
+
+No. The free plan requires no payment method.
+
+**What is the annual discount?**
+
+Annual billing on Pro and Team is available at a discount. Contact support for current rates.
+
+**How do I cancel?**
+
+You can cancel from Settings > Billing. Your plan stays active through the end of the current billing period. No partial-month refunds.
