@@ -28,17 +28,17 @@
               "workflows/fix",
               "workflows/task",
               "workflows/improve",
-              "workflows/pr-review",
-              "workflows/learn"
+              "workflows/govern",
+              "workflows/pr-review"
             ]
           },
           {
             "group": "Concepts",
             "pages": [
-              "concepts/byok",
-              "concepts/three-step-analysis",
               "concepts/fix-gauntlet",
-              "concepts/virtual-patches"
+              "concepts/three-step-analysis",
+              "concepts/virtual-patches",
+              "concepts/byok"
             ]
           },
           {
@@ -48,6 +48,30 @@
               "reference/workflow-costs",
               "reference/finding-fields",
               "reference/hydra-directory"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "reference/api-authentication"
+            ]
+          },
+          {
+            "group": "Core",
+            "pages": [
+              "reference/api-jobs",
+              "reference/api-observations"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "reference/api-webhooks"
             ]
           }
         ]
@@ -62,7 +86,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://hydra.iru.dev"
+      "href": "https://app.gethydra.ai"
     }
   }
 }

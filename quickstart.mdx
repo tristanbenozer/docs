@@ -1,52 +1,51 @@
 ---
 title: "Quick Start"
-description: "Install Hydra, run your first audit, and close your first Linear ticket automatically. Under 10 minutes."
+description: "Connect your first repo and close your first Linear ticket automatically. Under 10 minutes."
 ---
 
 ## 1. Create your account
 
-Sign in at [hydra.iru.dev](https://hydra.iru.dev) using your GitHub account.
+Sign in at [app.gethydra.ai](https://app.gethydra.ai) using your GitHub account.
 
 ## 2. Install the GitHub App
 
-After signing in, install the Hydra GitHub App on the organization and repositories you want Hydra to monitor. Hydra needs read and write access to open pull requests and post check results.
+After signing in, install the Hydra GitHub App on the organization and repositories you want Hydra to scan. Hydra needs read access to your code and write access to open pull requests and post check results.
 
-## 3. Add your Anthropic API key
+## 3. Add a repository
 
-Go to **Settings > API Keys** and add your Anthropic API key. Every Hydra workflow runs against your own key.
+Go to **Repositories** and click **Add repository**. Select the repo and the branch you want Hydra to monitor.
 
-<Note>
-All AI compute bills directly to your Anthropic account. Hydra charges a platform subscription only. [Learn why](/concepts/byok).
-</Note>
+Discovery runs automatically as soon as you add the repo.
 
-## 4. Add a repository
+## 4. Discovery runs
 
-Go to **Repositories** and click **Add repository**. Select the repo and configure the branch you want Hydra to monitor.
+Hydra reads your entire codebase and builds a living knowledge base in `.hydra/`:
 
-## 5. Discovery runs automatically
+- `architecture.md` — how the codebase is structured
+- `conventions.md` — naming patterns, test patterns, API patterns
+- `howto/` — project-specific guides generated from your code
 
-Hydra immediately starts Discovery on the repository. It reads the entire codebase, builds an application profile, and generates the `.hydra/` documentation directory. This runs once per repository and costs approximately $5-10 on your Anthropic key.
+This runs once and takes 10–20 minutes depending on codebase size. You will see progress in the dashboard.
 
-Discovery opens a pull request to your repo that adds the `.hydra/` directory. Merging it activates CLAUDE.md injection for your team.
+Hydra also opens a pull request to inject a block into your repo's `CLAUDE.md`. Merge it and every developer using Claude Code in that repo gets Hydra's architecture context in every session automatically.
 
 <Info>
-Discovery takes 10-20 minutes depending on codebase size. You will see progress in the dashboard. Everything else waits until Discovery completes.
+All AI inference runs on AWS Bedrock, managed by Hydra. No API key setup required.
 </Info>
 
-## 6. Run your first audit
+## 5. Run your first audit
 
-Once Discovery completes, click **Run Audit**. The audit runs a three-step analysis across six parallel agent groups and returns a prioritized list of findings. Each finding includes severity, effort estimate, risk rating, and a change plan.
+Once Discovery completes, click **Run Audit**. The audit runs six parallel domain agent groups against your codebase and returns a prioritized list of findings. Each finding includes severity, effort estimate, risk rating, and a change plan.
 
-The audit costs $1-35 depending on codebase size. Most mid-sized repos land between $3-8.
+Most repos complete in 10–20 minutes. Findings appear in the **Findings** tab sorted by priority.
 
-## 7. Fix your first finding
+## 6. Fix your first finding
 
 Select a finding and click **Fix**. Hydra will:
 
-1. Create a Linear ticket with full context
-2. Run the 11-step quality gauntlet
-3. Open a pull request
-4. Close the Linear ticket on merge
+1. Run the 11-gate quality gauntlet in an isolated Git worktree
+2. Open a pull request with the fix
+3. Close the Linear ticket on merge
 
 <Check>
 Your first autonomous fix is running. No further action required until you review the PR.
@@ -56,15 +55,15 @@ Your first autonomous fix is running. No further action required until you revie
 
 <CardGroup cols={2}>
   <Card title="How the audit works" icon="magnifying-glass" href="/workflows/audit">
-    The three-step analysis, the six agent groups, and what findings contain.
+    Six parallel domain agent groups and what findings contain.
   </Card>
   <Card title="The fix gauntlet" icon="shield-check" href="/concepts/fix-gauntlet">
     The 11 quality gates every fix passes before a PR opens.
   </Card>
-  <Card title="BYOK explained" icon="key" href="/concepts/byok">
-    Why you bring your own key and what it means for your data.
+  <Card title="Govern" icon="git-pull-request" href="/workflows/govern">
+    Automated PR review that runs on every push.
   </Card>
   <Card title="Workflow costs" icon="receipt" href="/reference/workflow-costs">
-    Per-workflow cost ranges for your Anthropic bill.
+    Per-workflow compute credit consumption.
   </Card>
 </CardGroup>

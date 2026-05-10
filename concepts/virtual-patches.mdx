@@ -1,13 +1,13 @@
 ---
 title: "Virtual Patches"
-description: "How Learn improvements are injected into every subsequent audit at runtime, without a code deployment."
+description: "How Govern improvements are injected into every subsequent audit at runtime, without a code deployment."
 ---
 
-A virtual patch is an improvement to Hydra's analysis that is applied at runtime -- injected into the audit pipeline when the audit starts, not compiled into the codebase. The next audit after a virtual patch is accepted is immediately smarter. No deployment required.
+A virtual patch is an improvement to Hydra's analysis that is applied at runtime — injected into the audit pipeline when the audit starts, not compiled into the codebase. The next audit after a virtual patch is accepted is immediately smarter. No deployment required.
 
 ## How it works
 
-When [Learn](/workflows/learn) proposes an improvement and you approve it, Hydra stores the improvement as an active virtual patch for your repo (or globally, for scanner pattern contributions).
+When [Govern](/workflows/learn) generates a scanner pattern improvement and you approve it, Hydra stores it as an active virtual patch for your repo (or globally, for scanner pattern contributions).
 
 At the start of every subsequent audit:
 
@@ -24,9 +24,9 @@ No source code changes. No deployment. The improvement is live.
 
 ## Why this matters
 
-The alternative to virtual patches is a pull request to the Hydra codebase for every improvement -- code review, merge, deployment, rollout. For a system designed to improve continuously from real-world usage, that cycle is too slow.
+The alternative to virtual patches is a pull request to the Hydra codebase for every improvement — code review, merge, deployment, rollout. For a system designed to improve continuously from real-world usage, that cycle is too slow.
 
-Virtual patches decouple the improvement loop from the deployment cycle. Learn can run after every audit. Accepted improvements are active immediately. The system gets smarter on the same day you run Learn.
+Virtual patches decouple the improvement loop from the deployment cycle. Govern generates patterns after every resolved finding. Accepted improvements are active immediately. The system gets smarter on the same day you close a finding.
 
 ## Patch types
 
@@ -40,20 +40,18 @@ Virtual patches decouple the improvement loop from the deployment cycle. Learn c
 
 ## Managing patches
 
-Active patches are visible in **Repository Settings > Learn** with status `active`. From there you can:
+Active patches are visible in **Repository Settings > Govern** with status `active`. From there you can:
 - Review what each patch does
 - Deactivate a patch without deleting it
-- See which Learn run proposed the patch
+- See which run proposed the patch
 
-Patches with status `pending` have been proposed by Learn but not yet reviewed.
+Patches with status `pending` have been proposed but not yet reviewed.
 
 ## Global contributions
 
-Scanner pattern patches can optionally be contributed to the global pattern library, making them available to all Hydra tenants. The contribution sends only mechanical fields -- regex, severity, file scope, and category. No prose, no finding text, and no codebase content crosses the tenant boundary.
-
-See [Learn: Global contributions](/workflows/learn#global-contributions) for details.
+Scanner pattern patches can optionally be contributed to the global pattern library, making them available to all Hydra tenants. The contribution sends only mechanical fields — regex, severity, file scope, and category. No prose, no finding text, and no codebase content crosses the tenant boundary.
 
 ## Related
 
-- [Learn](/workflows/learn) -- the workflow that generates virtual patches
-- [Audit](/workflows/audit) -- the workflow virtual patches make smarter
+- [Govern](/workflows/learn) — the workflow that generates virtual patches
+- [Audit](/workflows/audit) — the workflow virtual patches make smarter

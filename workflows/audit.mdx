@@ -1,40 +1,36 @@
 ---
 title: "Audit"
-description: "Three-step analysis across six parallel agent groups. Every finding includes severity, effort, risk, and a change plan."
+description: "Six parallel domain agent groups plus a deterministic scanner. Every finding includes severity, effort, risk, and a change plan."
 ---
 
-The Audit workflow runs a full analysis of your codebase and returns a prioritized list of findings. It requires Discovery to have completed first.
+The Audit workflow runs a full analysis of your codebase and returns a prioritized list of findings. Discovery must complete before Audit can run.
 
-**Cost:** $1-35 depending on codebase size. Most mid-sized repos land between $3-8. **Time:** 10-20 minutes.
+**Cost:** ~$3–15 in compute credits depending on codebase size. **Time:** 10–20 minutes.
 
 ## How the audit works
 
 ### Pre-flight: repo-specific protocol generation
 
-Before any analysis runs, a separate model call generates analysis protocols tailored to this specific repository. Every agent is briefed on the repo's profile, constraints, and historical patterns before starting. Agents do not run generic checklists -- they run checklists customized to this codebase on this run.
+Before any analysis runs, a model call generates an analysis protocol tailored to this specific repository. Every agent is briefed on the repo's profile, constraints, and historical patterns before starting. Agents do not run generic checklists — they run checklists customized to this codebase for this run.
 
 ### Step 1: Deterministic scanner
 
-Hydra runs a library of deterministic scanner patterns against the codebase -- regex patterns over specific file types, evaluated by a rules engine. Fast, cheap, no LLM cost. Scanner findings are capped at `medium` severity until LLM-verified. Pattern matches alone cannot raise a `critical` or `high` alert.
+Hydra runs a library of 39 deterministic scanner patterns against the codebase — Semgrep-backed regex patterns over specific file types evaluated in parallel. Fast, zero LLM cost. Scanner findings are capped at `medium` severity until LLM-verified. Pattern matches alone cannot raise a `critical` or `high` finding.
 
-### Step 2: Six parallel agent groups
+### Step 2: Six parallel domain agent groups
 
 Six agent groups run simultaneously, each covering a domain. Every finding produced includes severity, effort estimate, risk rating, confidence level, and a change plan.
 
 | Group | Analysis areas |
 |---|---|
-| **Security** | Auth, hardening, privacy, compliance, vulnerability patterns |
-| **Code Quality** | Cleanup, refactoring, modernization, AI usage patterns, test coverage |
-| **Reliability** | Performance, concurrency, resilience, error handling, cost |
-| **API + Data** | API contracts, schema design, database patterns, validation, multi-tenancy |
-| **Ops** | Dependencies, config, observability, logging, feature flags, deployment |
-| **UX** | Accessibility, internationalization, error UX, frontend performance, bundle size |
+| **Security** | Auth, access control, hardening, privacy, compliance |
+| **Correctness** | Dead code, naming, structural refactors, AI usage patterns, test coverage |
+| **Maintainability** | Coupling, complexity, documentation gaps, dependency hygiene |
+| **Performance** | Concurrency, resilience, resource management, cost footprint |
+| **Architecture** | API contracts, schema design, database patterns, input validation, multi-tenancy |
+| **Operations** | Dependencies, config management, observability, logging, feature flags |
 
-Application profile weighting applies at this step. A security finding on a customer-facing app is weighted higher than the same finding on an internal tool.
-
-### Step 3: Opus meta-review
-
-After the structured analysis, Hydra runs a single Opus call with one instruction: find the systemic gaps the prior steps missed. No checklist. No category constraint. Every meta-review finding must include a novelty rationale -- why wasn't this caught by the pattern-based analysis? This requirement keeps the step producing genuinely new signal rather than restating what step 2 already found.
+All six groups run in parallel. Combined output is a deduplicated, prioritized finding pool.
 
 ## Findings
 
@@ -43,9 +39,9 @@ Each finding contains:
 | Field | Description |
 |---|---|
 | `severity` | `critical`, `high`, `medium`, or `low` |
-| `effort` | `trivial`, `small`, `medium`, or `large` -- how hard the fix is |
-| `risk` | `low`, `medium`, or `high` -- risk of attempting the fix |
-| `confidence` | `high`, `medium`, or `low` -- agent's self-assessed evidence quality |
+| `effort` | `trivial`, `small`, `medium`, or `large` — how hard the fix is |
+| `risk` | `low`, `medium`, or `high` — risk of attempting the fix |
+| `confidence` | `high`, `medium`, or `low` — agent's self-assessed evidence quality |
 | `change_plan` | Agent-authored description of the approach, files to modify, and test strategy |
 | `source` | `scanner` (deterministic) or `agent` (LLM) |
 
@@ -53,7 +49,7 @@ See [Finding Fields](/reference/finding-fields) for the complete schema.
 
 ## Freeform Notes
 
-If you know something about the codebase that Discovery would not surface, add it as a Freeform Note on the repository. Notes inject directly into every LLM prompt Hydra runs on that repo -- immediately active, no re-run required.
+If you know something about the codebase that Discovery would not surface, add it as a Freeform Note on the repository. Notes inject directly into every LLM prompt Hydra runs on that repo — immediately active, no re-run required.
 
 Examples:
 - "We are mid-migration from PostgreSQL to CockroachDB. Do not suggest PostgreSQL-specific patterns."
@@ -62,10 +58,10 @@ Examples:
 
 ## Running an audit
 
-Audits can be triggered manually from the repository dashboard or configured to run on a schedule. After an audit completes, findings appear in the **Findings** tab sorted by a computed priority score.
+Audits are triggered manually from the repository dashboard. After an audit completes, findings appear in the **Findings** tab sorted by a computed priority score.
 
 ## Related
 
-- [Three-Step Analysis](/concepts/three-step-analysis) -- deeper explanation of how each step works
-- [Fix](/workflows/fix) -- execute an autonomous fix on a finding
-- [Learn](/workflows/learn) -- make every future audit smarter based on this one
+- [Fix](/workflows/fix) — execute an autonomous fix on a finding
+- [Improve](/workflows/improve) — surface and fix technical debt systematically
+- [Finding Fields](/reference/finding-fields) — complete finding schema

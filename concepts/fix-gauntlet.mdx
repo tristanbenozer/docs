@@ -3,65 +3,67 @@ title: "The Fix Gauntlet"
 description: "The 11 quality gates every Fix and Task runs through before a pull request opens. None are skippable."
 ---
 
-Every fix -- whether triggered from a detected finding ([Fix](/workflows/fix)) or a plain-English directive ([Task](/workflows/task)) -- runs the same 11-step quality gauntlet before a pull request opens. The steps run in order. A failure at any step aborts the run.
+Every fix — whether triggered from a detected finding ([Fix](/workflows/fix)) or a plain-English directive ([Task](/workflows/task)) — runs the same 11-gate quality gauntlet before a pull request opens. Gates run in order. Failure at any gate aborts the run.
 
-## The 11 steps
+## The 11 gates
 
 <Steps>
-  <Step title="Isolated Git worktree">
-    The fix runs in a dedicated Git worktree, isolated from your main branch. No partial changes can reach your codebase during execution.
+  <Step title="Baseline tests captured">
+    Hydra records which tests exist and what they expect before any code changes. This snapshot is the regression baseline for gate 4. Changes are compared against this baseline, not against the current repo state.
   </Step>
-  <Step title="Baseline tests established">
-    Hydra records which tests exist and what they expect before any code changes. This snapshot is the regression baseline for Step 5. Changes made during the fix are compared against this baseline, not against the current state of the repo.
-  </Step>
-  <Step title="Agent executes fix">
-    The fix agent runs against the codebase. It has access to your Discovery profile -- conventions, architecture, and patterns specific to this repository. For Fix, the agent receives the original finding plus the change plan. For Task, the agent receives the refined directive.
+  <Step title="Fix agent executes">
+    The fix agent runs against the codebase with full access to your Discovery profile — conventions, architecture, and patterns specific to this repository. For Fix, the agent receives the original finding and change plan. For Task, the agent receives the refined directive.
   </Step>
   <Step title="Diff size guard">
-    The diff is measured. If it exceeds **20 changed files** or **2,000 total lines**, the run aborts. Scope control is enforced mechanically -- not left to the agent's judgment. Fixes that fail this gate should be split into smaller scope.
+    The diff is measured. If it exceeds **20 changed files** or **2,000 total lines**, the run aborts. Scope is enforced mechanically — not left to the agent's judgment. Fixes that fail this gate should be split into smaller scope.
   </Step>
   <Step title="Regression gate">
-    Every test from the Step 2 baseline must still pass. If any test that was passing before the fix now fails, the run aborts. The regression gate does not care why a test fails -- any failure is an abort signal.
+    Every test from the gate 1 baseline must still pass. If any test that was passing before the fix now fails, the run aborts. The regression gate does not care why a test fails — any failure is an abort signal.
   </Step>
   <Step title="Build verification">
     The project must still build cleanly after the fix. Build failure aborts the run regardless of test results.
   </Step>
-  <Step title="Format and lint">
-    Changed files are auto-formatted and linted using the project's existing configuration. The fix follows the same style conventions as the rest of the codebase.
+  <Step title="Lint">
+    Changed files are linted using the project's existing configuration. The fix follows the same code style as the rest of the codebase.
+  </Step>
+  <Step title="Cross-project test">
+    If this repo is part of a workspace with related repos, all related repos must still pass their test suites. A fix cannot pass this gate if it silently breaks a downstream dependency.
   </Step>
   <Step title="Scanner quality loop">
-    The fix is run through Hydra's own scanner. Hydra reviews its own work before the PR opens. This loop runs up to 2 iterations with cycle detection to prevent infinite loops. New findings introduced by the fix must be resolved before proceeding.
+    The fix is run through Hydra's own scanner. Hydra reviews its own work before the PR opens. This loop runs up to two iterations with cycle detection to prevent infinite loops. New findings introduced by the fix must be resolved before proceeding.
   </Step>
   <Step title="Reviewer agent">
-    A second, independent LLM agent reviews the fix. It can approve, request revision, or reject. If it requests revision, one revision attempt runs before the fix is escalated. The reviewer agent cannot see the original agent's reasoning -- it evaluates the diff and the stated change plan independently.
+    A second, independent LLM agent reviews the fix. It can approve, request revision, or reject. If it requests revision, one revision attempt runs. The reviewer agent evaluates the diff and the stated change plan independently.
   </Step>
-  <Step title="Post-fix audit">
-    A full audit runs on the changed files to verify no new issues were introduced. This is not a diff-only check -- it is the same analysis pipeline that runs on a full audit, scoped to the changed files.
+  <Step title="Revision loop">
+    If the reviewer agent requested changes, the fix agent runs one revision. The revised diff is evaluated again. If the revision does not satisfy the reviewer, the run escalates.
   </Step>
-  <Step title="Pull request opened">
-    The PR is opened with the fix, the change plan, any accepted risks, and a testing plan. The Linear ticket is referenced in the PR description.
+  <Step title="Detection-query verify">
+    Before the PR opens, Hydra verifies the original finding no longer exists in the patched code. This prevents a PR from opening for a fix that did not actually resolve the issue.
   </Step>
 </Steps>
 
+After all 11 gates pass, the PR is opened with the fix, change plan, any accepted risks, and a testing plan.
+
 ## Escalation
 
-When a fix fails after a revision attempt, Hydra surfaces an explicit escalation signal with:
-- The specific step that failed
+When a fix fails, Hydra surfaces:
+- The specific gate that failed
 - The reason for failure
 - A suggested next step: retry with a stronger model, split into smaller scope, or route to a human reviewer
 
-Hydra does not auto-escalate. Control returns to you with a specific explanation. You decide what happens next.
+Hydra does not auto-escalate. Control returns to you with a specific explanation.
 
 ## Fix breadcrumbs
 
-Before Step 3 (the agent executes), Hydra commits a `.hydra/fixes/{ref}/` directory into the worktree containing the original finding, the change plan, and machine-readable metadata. This directory ships as part of the merged pull request permanently.
+Before gate 2 (the agent executes), Hydra commits a `.hydra/fixes/{ref}/` directory into the worktree containing the original finding, the change plan, and machine-readable metadata. This directory ships as part of the merged pull request permanently.
 
-Every merged Hydra fix is a self-documenting record in version control. The breadcrumb is written before any code change -- even a failed fix leaves a record of its intent.
+Every merged Hydra fix is a self-documenting record in version control. The breadcrumb is written before any code change — even a failed fix leaves a record of its intent.
 
 See [The .hydra/ Directory](/reference/hydra-directory) for the full directory structure.
 
 ## Related
 
-- [Fix](/workflows/fix) -- triggering a fix from a detected finding
-- [Task](/workflows/task) -- the same gauntlet, starting from a plain-English directive
-- [Finding Fields](/reference/finding-fields) -- what information a finding carries into the fix agent
+- [Fix](/workflows/fix) — triggering a fix from a detected finding
+- [Task](/workflows/task) — the same gauntlet, starting from a plain-English directive
+- [Finding Fields](/reference/finding-fields) — what information a finding carries into the fix agent

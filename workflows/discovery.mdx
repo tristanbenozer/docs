@@ -3,9 +3,9 @@ title: "Discovery"
 description: "Hydra reads your entire codebase once, builds an application profile, and generates the documentation that every subsequent workflow runs on."
 ---
 
-Discovery is the first action Hydra takes on any repository. It runs automatically when you add a repo and runs once. Everything else -- audits, fixes, PR reviews -- uses the context Discovery produced.
+Discovery is the first action Hydra takes on any repository. It runs automatically when you add a repo. Everything else — audits, fixes, PR reviews — uses the context Discovery produced.
 
-**Cost:** ~$5-10 on your Anthropic key. **Time:** 10-20 minutes depending on codebase size.
+**Cost:** ~$5–10 in compute credits. **Time:** 10–20 minutes depending on codebase size.
 
 ## What Discovery produces
 
@@ -13,10 +13,10 @@ Discovery generates two outputs: an internal context used by Hydra's analysis an
 
 ### Internal context
 
-- Application profile: what type of application this is (customer-facing, internal tool, external API, etc.), its audience, data sensitivity level, and compliance requirements
-- Architecture overview: how the codebase is structured, which components own which responsibilities
-- Conventions: how features are built in this codebase, naming patterns, test patterns, API patterns
-- How-to guides: project-specific guides Hydra generates from the code (e.g. "how to add a new API endpoint in this repo," "how to write tests for this service")
+- **Application profile** — what type of application this is (customer-facing, internal tool, external API, etc.), its audience, data sensitivity level, and compliance requirements
+- **Architecture overview** — how the codebase is structured, which components own which responsibilities
+- **Conventions** — how features are built in this codebase, naming patterns, test patterns, API patterns
+- **How-to guides** — project-specific guides Hydra generates from the code (e.g. "how to add a new API endpoint in this repo," "how to write tests for this service")
 
 ### Published output: the `.hydra/` directory
 
@@ -24,10 +24,9 @@ Discovery opens a pull request to your repository adding a `.hydra/` directory c
 
 ```
 .hydra/
-├── hydra.md          # Table of contents and entry point for AI agents
 ├── architecture.md   # How the codebase is structured
 ├── conventions.md    # Patterns found in this codebase
-└── guides/           # Project-specific how-to guides
+└── howto/            # Project-specific how-to guides
 ```
 
 Merge the PR to activate the full Discovery output.
@@ -38,16 +37,16 @@ During Discovery, Hydra determines the profile of the application and uses it to
 
 | Application type | What gets weighted higher |
 |---|---|
-| Customer-facing frontend | Accessibility, PII handling, security |
+| Customer-facing frontend | PII handling, security |
 | External API | Input validation, authentication, rate limiting |
 | Internal tool | Performance, observability, maintainability |
 | Background service | Reliability, error handling, resource management |
 
-This weighting applies to every audit and PR review on the repository. It is not configurable -- Hydra determines the profile from the code.
+This weighting applies to every audit on the repository.
 
 ## CLAUDE.md injection
 
-Discovery also patches the repository's `CLAUDE.md` file (creating it if it does not exist) with a reference to `hydra.md`. After the Discovery PR merges, every developer on the team using Claude Code will automatically load Hydra's codebase context when they work in the repository -- without installing anything or changing how they work.
+Discovery opens a PR that injects a block into your repo's `CLAUDE.md`. After the PR merges, every developer on the team using Claude Code will automatically load Hydra's codebase context when they work in the repository — without installing anything or changing how they work.
 
 <Info>
 CLAUDE.md injection is passive distribution. One developer installs Hydra. The entire team benefits from the generated documentation in their AI coding sessions automatically.
@@ -55,10 +54,10 @@ CLAUDE.md injection is passive distribution. One developer installs Hydra. The e
 
 ## Re-running Discovery
 
-Discovery does not run automatically after the initial run. To regenerate the `.hydra/` directory after significant codebase changes, trigger a manual re-run from the repository settings in the Hydra dashboard.
+Discovery does not run automatically after the initial run. To regenerate the `.hydra/` directory after significant codebase changes, trigger a manual re-run from the repository settings.
 
 ## Related
 
-- [Freeform Notes](/workflows/audit#freeform-notes) -- inject additional context that Discovery would not surface
-- [Workflow Costs](/reference/workflow-costs) -- cost breakdown by workflow
-- [The `.hydra/` Directory](/reference/hydra-directory) -- full reference for the generated directory structure
+- [Freeform Notes](/workflows/audit#freeform-notes) — inject additional context Discovery would not surface
+- [Workflow Costs](/reference/workflow-costs) — compute credit breakdown by workflow
+- [The `.hydra/` Directory](/reference/hydra-directory) — full reference for the generated directory structure

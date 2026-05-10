@@ -1,0 +1,89 @@
+---
+title: "Authentication"
+description: "API key authentication for the Hydra REST API."
+---
+
+The Hydra API uses bearer token authentication. All requests must include an `Authorization` header.
+
+```
+Authorization: Bearer hk_live_<your_key>
+```
+
+## API keys
+
+API keys are scoped to your organization. They inherit the permissions of the user who created them.
+
+### Create a key
+
+In the Hydra dashboard, go to **Settings > API Keys** and click **New key**. Give it a name and optionally set an expiration date.
+
+The full key is shown once on creation. Store it securely — it cannot be retrieved again. Only the key prefix is stored for display.
+
+**Key format:** `hk_live_<random32>` for production keys. Test keys use `hk_test_<random32>`.
+
+### Manage keys
+
+```http
+GET /api/keys
+```
+List all active API keys for your organization.
+
+```http
+POST /api/keys
+Content-Type: application/json
+
+{
+  "name": "CI pipeline",
+  "expires_at": "2027-01-01T00:00:00Z"
+}
+```
+Create a new key. `expires_at` is optional.
+
+```http
+DELETE /api/keys/{id}
+```
+Revoke a key immediately.
+
+## Permissions
+
+Keys carry the role of the creating user. Roles and their permissions:
+
+| Role | Permissions |
+|---|---|
+| `admin` | All permissions |
+| `member` | Submit jobs, cancel jobs, triage findings |
+| `viewer` | Read-only |
+
+## Rate limiting
+
+Default: 600 requests per minute per organization. Rate limit headers are included on every response:
+
+```
+X-RateLimit-Limit: 600
+X-RateLimit-Remaining: 598
+X-RateLimit-Reset: 1746000000
+```
+
+## Error responses
+
+All errors use a consistent envelope:
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Invalid or expired API key"
+  }
+}
+```
+
+Common error codes:
+
+| Code | HTTP status | Meaning |
+|---|---|---|
+| `unauthorized` | 401 | Missing or invalid key |
+| `forbidden` | 403 | Valid key but insufficient permissions |
+| `not_found` | 404 | Resource does not exist or is in a different organization |
+| `conflict` | 409 | Idempotency key collision or duplicate resource |
+| `rate_limited` | 429 | Too many requests |
+| `unprocessable` | 422 | Invalid request body |

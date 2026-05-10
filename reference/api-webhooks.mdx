@@ -1,0 +1,76 @@
+---
+title: "Webhooks"
+description: "GitHub App webhook events Hydra receives and acts on."
+---
+
+Hydra receives webhooks from GitHub via the installed GitHub App. You do not configure these directly — they are delivered automatically when you install the app.
+
+## Endpoint
+
+```
+POST /api/webhooks/github
+```
+
+## Signature verification
+
+Every webhook is signed with `X-Hub-Signature-256`. Hydra verifies the signature before processing. Unsigned or invalid requests are rejected with `401`.
+
+```
+X-Hub-Signature-256: sha256=<hmac-hex>
+```
+
+The signature is computed as HMAC SHA256 of the raw request body using your installation's webhook secret.
+
+## Events handled
+
+### pull_request — opened or synchronize
+
+Triggers a PR Review job when a pull request is opened or a new commit is pushed.
+
+```json
+{
+  "action": "opened",
+  "installation": { "id": 12345 },
+  "repository": {
+    "name": "your-repo",
+    "full_name": "your-org/your-repo"
+  },
+  "pull_request": {
+    "number": 42,
+    "title": "feat: add user dashboard",
+    "head": { "ref": "feat/user-dashboard", "sha": "abc123" },
+    "base": { "ref": "main", "sha": "def456" },
+    "html_url": "https://github.com/your-org/your-repo/pull/42",
+    "draft": false
+  }
+}
+```
+
+### pull_request — closed
+
+If the merged PR is a Hydra fix branch (`hydra/fix-*` or `hydra/task-*`), Hydra:
+- Marks the associated observation as `closed / fixed`
+- Closes the Linear ticket if connected
+
+If the closed PR is a Hydra publish branch (`hydra/publish-docs-*`), Hydra updates the `.hydra/` knowledge base status.
+
+### WebhookAcknowledgement response
+
+```json
+{
+  "ok": true,
+  "tenant_id": "tenant_01abc...",
+  "job_id": "job_01abc...",
+  "followup_queued": true
+}
+```
+
+`job_id` is present when a workflow job was queued as a result of the webhook. `followup_queued` indicates that a background job will run after the initial webhook processing completes.
+
+## Tenant resolution
+
+Hydra resolves the receiving tenant from the GitHub App `installation.id`. Each installation maps to exactly one Hydra organization. Webhooks for installations not found in Hydra are acknowledged but not processed.
+
+## Delivery retries
+
+GitHub retries failed webhooks up to three times with exponential backoff. Hydra processes each delivery idempotently — duplicate deliveries for the same event do not create duplicate jobs.

@@ -1,0 +1,120 @@
+---
+title: "Observations API"
+description: "List, triage, and fix findings and improvement suggestions via the REST API."
+---
+
+Observations are the findings and suggestions produced by Audit and Improve. The Observations API lets you list, filter, triage, and trigger fixes programmatically.
+
+## List observations
+
+```http
+GET /api/observations?kind=finding&status=new&priority=P0&limit=50
+```
+
+Cursor-paginated list of all observations for your organization.
+
+**Query parameters:**
+
+| Parameter | Values | Description |
+|---|---|---|
+| `kind` | `finding`, `suggestion` | Filter by type. Findings come from Audit. Suggestions from Improve (I-prefixed). |
+| `status` | `new`, `triaged`, `in_progress`, `closed` | Filter by status |
+| `priority` | `P0`, `P1`, `P2`, `P3` | Filter by priority |
+| `category` | `security`, `correctness`, `maintainability`, `performance`, `architecture`, `operations` | Filter by domain group |
+| `repo` | repo name | Filter to a specific repo |
+| `cursor` | string | Pagination cursor |
+| `limit` | number | Page size (default 20, max 100) |
+
+**Response:**
+
+```json
+{
+  "items": [
+    {
+      "id": "obs_01abc...",
+      "ref": "HYDRA-42",
+      "kind": "finding",
+      "status": "new",
+      "priority": "P1",
+      "category": "security",
+      "title": "SQL injection risk in user query builder",
+      "repo_id": "repo_01...",
+      "created_at": "2026-05-10T12:00:00Z",
+      "last_seen_at": "2026-05-10T12:00:00Z"
+    }
+  ],
+  "cursor": "next_page_cursor"
+}
+```
+
+## Get an observation
+
+```http
+GET /api/observations/{ref}
+```
+
+Returns full observation details including all locations, fix attempts, and triage history.
+
+`ref` is the human-readable reference (e.g., `HYDRA-42`) or the internal ID.
+
+## Triage an observation
+
+```http
+POST /api/observations/{ref}/triage
+Content-Type: application/json
+```
+
+**Keep:**
+
+```json
+{
+  "action": "keep"
+}
+```
+
+**Dismiss:**
+
+```json
+{
+  "action": "dismiss",
+  "dismissal_category": "false_positive",
+  "dismissal_note": "This pattern is intentional — the input is sanitized upstream at the middleware layer."
+}
+```
+
+**Dismissal categories:** `false_positive`, `wont_fix`, `out_of_scope`, `stale`, `other`
+
+`dismissal_note` is required when dismissing. Must be 10–500 characters.
+
+## Fix an observation
+
+```http
+POST /api/observations/{ref}/fix
+```
+
+Spawns a Fix job for this observation. Returns the job ID.
+
+**Response:** `201 Created`
+
+```json
+{
+  "job_id": "job_01abc...",
+  "observation_ref": "HYDRA-42",
+  "outcome": "pending"
+}
+```
+
+The fix runs asynchronously. Use `GET /api/jobs/{job_id}` to monitor progress.
+
+## Reopen an observation
+
+```http
+POST /api/observations/{ref}/reopen
+Content-Type: application/json
+
+{
+  "reopen_reason": "The fix introduced a regression and was reverted."
+}
+```
+
+Moves a closed observation back to `new`. Returns `200 OK`.

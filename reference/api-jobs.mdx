@@ -1,0 +1,172 @@
+---
+title: "Jobs API"
+description: "Create, monitor, and manage Hydra workflow jobs via the REST API."
+---
+
+Jobs are the core unit of work in Hydra. Every workflow run — audit, fix, discovery, improve — is a job.
+
+## Base URL
+
+All job endpoints are scoped under the repo path:
+
+```
+/api/{org}/{repo}/{branch}/jobs
+```
+
+Or for tenant-wide operations:
+
+```
+/api/jobs
+```
+
+## Create a job
+
+```http
+POST /api/{org}/{repo}/{branch}/jobs
+Content-Type: application/json
+Idempotency-Key: <optional-client-key>
+```
+
+**Request body:**
+
+```json
+{
+  "workflow": "audit",
+  "params": {
+    "mode": "full"
+  }
+}
+```
+
+**Workflow values:** `audit`, `discover`, `fix`, `task`, `improve`, `review`, `publish`
+
+**Common params by workflow:**
+
+| Workflow | Key params |
+|---|---|
+| `audit` | `mode` (`full` or `scanner_only`) |
+| `fix` | `observation_ref` (e.g. `"HYDRA-42"`) |
+| `task` | `task_prompt` (plain-English directive) |
+| `improve` | `mode` (`full`) |
+| `review` | `pr_number`, `review_mode` (`scanner` or `llm`) |
+
+**Response:** `201 Created`
+
+```json
+{
+  "id": "job_01abc...",
+  "workflow": "audit",
+  "status": "pending",
+  "repo_name": "your-org/your-repo@main",
+  "created_at": "2026-05-10T12:00:00Z",
+  "cost_usd": 0,
+  "params": { "mode": "full" }
+}
+```
+
+### Idempotency
+
+Supply an `Idempotency-Key` header to prevent duplicate jobs. If a job with the same key already exists and is not in a terminal state, the existing job is returned instead of creating a new one.
+
+## Get a job
+
+```http
+GET /api/jobs/{job_id}
+```
+
+Returns full job details including status, cost, token usage, and result.
+
+**Status values:** `pending`, `running`, `completed`, `failed`, `cancelled`
+
+**Response:**
+
+```json
+{
+  "id": "job_01abc...",
+  "workflow": "audit",
+  "status": "completed",
+  "repo_name": "your-org/your-repo@main",
+  "created_at": "2026-05-10T12:00:00Z",
+  "started_at": "2026-05-10T12:01:00Z",
+  "completed_at": "2026-05-10T12:14:22Z",
+  "cost_usd": 7.43,
+  "tokens_in": 284000,
+  "tokens_out": 12400,
+  "findings_count": 14,
+  "budget_status": "within",
+  "result": { ... }
+}
+```
+
+## List jobs
+
+```http
+GET /api/{org}/{repo}/{branch}/jobs?status=completed&workflow=audit&limit=20
+```
+
+Cursor-paginated. Use the `cursor` field from the previous response to fetch the next page.
+
+**Query parameters:**
+
+| Parameter | Description |
+|---|---|
+| `status` | Filter by status |
+| `workflow` | Filter by workflow type |
+| `cursor` | Pagination cursor from previous response |
+| `limit` | Page size (default 20, max 100) |
+
+## Cancel a job
+
+```http
+POST /api/jobs/{job_id}/cancel
+```
+
+Cancels a `pending` or `running` job. Returns `202 Accepted`.
+
+## Retry a job
+
+```http
+POST /api/jobs/{job_id}/retry
+```
+
+Creates a new job from a `failed` or `cancelled` job. The new job inherits the original params.
+
+**Response:** `201 Created` with new job object.
+
+## Job trace
+
+```http
+GET /api/jobs/{job_id}/trace
+```
+
+Returns the execution trace: every stage that ran, every LLM call made, tokens, cost, and duration per call.
+
+Useful for debugging failed jobs and understanding where cost was spent.
+
+## Job cost summary
+
+```http
+GET /api/jobs/{job_id}/cost-summary
+```
+
+Returns a full cost roll-up across the job and any resume chain, broken down by stage.
+
+## Polling pattern
+
+Jobs are asynchronous. Poll `GET /api/jobs/{job_id}` until `status` is `completed`, `failed`, or `cancelled`.
+
+```js
+async function waitForJob(jobId) {
+  while (true) {
+    const job = await fetch(`/api/jobs/${jobId}`, {
+      headers: { Authorization: `Bearer ${API_KEY}` }
+    }).then(r => r.json());
+
+    if (['completed', 'failed', 'cancelled'].includes(job.status)) {
+      return job;
+    }
+
+    await new Promise(r => setTimeout(r, 5000));
+  }
+}
+```

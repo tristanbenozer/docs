@@ -1,174 +1,103 @@
 ---
 title: "Plans and Pricing"
-description: "Hydra pricing is per-editor seat. Viewers are always free. Fix billing is separate from the seat price and depends on whether you use BYOK or hosted compute."
+description: "Four plans. All compute included. No API key setup required."
 ---
 
 ## Plans
 
-Hydra has four plans. The right plan depends on how many workflows your team needs and how large your organization is.
-
 | Plan | Price | Who it's for |
 |---|---|---|
 | Free | $0 | Individual developers evaluating Hydra |
-| Pro | $25 / editor / month | Teams that need Fix, Task, and Learn |
-| Team | $32 / editor / month | Teams that also need Govern and Improve |
+| Pro | $30 / month | Individual developers who need the full Fix workflow |
+| Team | $60 / seat / month | Teams that need all 9 workflows |
 | Enterprise | Custom | Organizations requiring SSO, audit logs, and compliance |
 
-Prices above are billed monthly. Annual billing is available on Pro and Team at a discount.
+Annual billing available on Pro and Team at 20% off.
 
 ---
 
-## What's included on each plan
+## What's included
 
 ### Free
 
-- 5 fixes per month
-- 1 repository
-- GitHub App (webhooks, PR creation, check runs)
-- Linear integration
-- Jira integration
-- Ticket creation on fix
-- Unlimited Viewer seats
-- Workflows available: Discovery, Audit (read-only)
-- Model: open-source (Qwen Coder-Next). No Anthropic key required.
-- Support: community
+- 1 repository (under 50,000 lines)
+- Full Discovery and Audit
+- 5 fixes per month — full 11-gate gauntlet on each
+- GitHub + Linear integration
+- CLAUDE.md injection
+- Public and private repos
+- Model: Qwen 2.5 (Hydra-managed)
+- No credit card required
 
-Free fixes run on Hydra's hosted open-source model. You do not need an Anthropic API key to use the free plan.
+After 5 fixes, Discovery and Audit are also paused until the next billing cycle. Upgrade to Pro to remove the limit.
 
-### Pro -- $25 / editor / month
+### Pro — $30 / month
 
 Everything in Free, plus:
 
-- Unlimited fixes (BYOK or hosted)
-- Unlimited repositories
-- All 7 workflows: Discovery, Audit, Fix, Task, Learn, Improve, PR Review
-- Author analytics (your own data only)
-- Fix billing: BYOK (unlimited, $0 to Hydra) or hosted ($1.50 / fix via AWS Bedrock)
-- Support: email
+- Up to 3 repositories
+- Full-depth audit — all findings, all severity levels
+- Discovery + Audit + Fix workflows
+- All integrations + Slack
+- Audit logs
+- Model: Claude Sonnet 4.6 via AWS Bedrock
+- $30 in compute credits included monthly
 
-### Team -- $32 / editor / month
+### Team — $60 / seat / month
 
 Everything in Pro, plus:
 
-- Govern -- PR Review runs automatically on every pull request
-- Improve -- full code quality workflows
-- Improve Lite -- architectural recommendations
-- Team admin and user management
-- Analytics across all authors (not just your own)
-- Audit runner permissions (admins can grant specific editors the right to trigger audits)
-- Role-based access: Viewer / Editor / Admin
-- Support: priority + dedicated Slack channel
+- Unlimited repositories
+- All 9 workflows: Discovery, Audit, Fix, Task, Improve, Govern, PR Review, Publish, Benchmark
+- Task, Improve, Govern, Benchmark workflows
+- Team analytics + role-based access
+- Custom webhooks
+- SSO / SAML
+- Model: Claude Sonnet 4.6 via AWS Bedrock
+- $60 in compute credits per seat included monthly
 
-### Enterprise -- Custom pricing, annual contract
+### Enterprise — Custom
 
 Everything in Team, plus:
 
-- SSO / SAML
-- Custom RBAC and granular permissions
-- Audit logs
-- Analytics exports (CSV and API)
+- Custom contracts and terms
+- Dedicated account manager
+- Custom onboarding
+- SLA guarantees
+- Compliance reporting
 - AWS Marketplace billing
-- Custom fix pricing (negotiated rate)
-- SOC 2 Type II
 - Data residency options
-- Dedicated support and SLA
-- Dedicated onboarding
 
-Contact us to discuss Enterprise pricing.
+Contact us at hi@gethydra.ai to discuss Enterprise.
 
 ---
 
-## Seats: Viewers, Editors, and Admins
+## Compute credits
 
-Hydra uses three roles. Only Editors and Admins count as paid seats.
+Pro and Team plans include compute credits matching the plan price. Credits cover AI inference across all workflows. Top up anytime from **Settings > Billing**.
 
-### Viewer (free on all plans)
-
-- Sees findings, audit results, and workflow status
-- Cannot click Fix, run audits, or manage users
-- Does not count as a paid seat
-- Unlimited Viewers on every plan
-
-### Editor (paid seat)
-
-- Can trigger Fix, Task, Improve, and other workflows
-- Author analytics are scoped to their own activity
-- Counts as one paid seat
-
-### Admin (paid seat)
-
-- Everything an Editor can do
-- Manages users: grants and revokes Editor vs. Viewer status
-- Manages billing and plan settings
-- Counts as one paid seat
-
-**Your seat count** is the number of Editors plus the number of Admins. Viewers are free and do not affect your bill.
+See [Workflow Costs](/reference/workflow-costs) for per-workflow credit consumption estimates.
 
 ---
 
-## Fix billing
-
-Fix billing is separate from your seat price. How it works depends on whether you use BYOK or hosted compute.
-
-### BYOK (Bring Your Own Key)
-
-Available on Pro and Team. You connect your Anthropic API key in Settings. All Fix, Task, Improve, and other AI workflow calls go directly from Hydra to Anthropic using your credentials.
-
-- Hydra charges $0 for AI compute. Your seat price is the only charge from Hydra.
-- You pay Anthropic directly at your account's API rates.
-- Typical cost per fix: $0.50 -- $1.50 on your Anthropic key, depending on codebase complexity.
-- No markup. No proxy. Your code goes to Anthropic, not through Hydra's API accounts.
-
-See [Bring Your Own Key](/concepts/byok) for setup instructions.
-
-### Hosted compute
-
-Available on Pro and Team for teams that prefer not to manage an Anthropic key.
-
-- $1.50 per fix, billed to Hydra.
-- Runs on AWS Bedrock (Claude via Amazon). No Anthropic account required.
-- Appears as a usage line item on your Hydra invoice alongside your seat charge.
-
-### Free plan
-
-The free plan includes 5 fixes per month on Hydra's hosted open-source model. No Anthropic key required. No per-fix charge.
-
----
-
-## Common billing questions
-
-**When am I charged?**
-
-Seat charges are monthly, on your billing anniversary date. Hosted fix charges accumulate during the month and appear on the same invoice.
-
-**What happens if I add a new Editor mid-month?**
-
-New Editor seats are prorated from the day they are added to the end of your current billing period.
-
-**Can I have more Viewers than Editors?**
-
-Yes. Viewers are unlimited and free on every plan. There is no cap.
-
-**Can I switch between BYOK and hosted?**
-
-Yes. You can toggle between BYOK and hosted in Settings at any time. Switching takes effect on the next fix run.
-
-**Is there an overage charge if I run more than 5 fixes on the free plan?**
-
-No overage. Fix workflows are blocked once you reach the monthly limit. Upgrade to Pro or Team to remove the limit.
-
-**How do I upgrade my plan?**
-
-Go to Settings > Billing in your Hydra dashboard to upgrade, change seat count, or switch billing periods.
+## Common questions
 
 **Do I need a credit card for the free plan?**
 
 No. The free plan requires no payment method.
 
+**What happens when I hit 5 fixes on the free plan?**
+
+Fix, Audit, and Discovery are paused until the next billing cycle. No overage charges.
+
+**Can I have Viewers who don't count as paid seats?**
+
+Yes. Viewer seats are free on all plans. Only Editor and Admin seats are counted toward the Team seat price.
+
 **What is the annual discount?**
 
-Annual billing on Pro and Team is available at a discount. Contact support for current rates.
+Annual billing on Pro and Team is 20% off the monthly price ($24/mo for Pro, $48/seat/mo for Team).
 
 **How do I cancel?**
 
-You can cancel from Settings > Billing. Your plan stays active through the end of the current billing period. No partial-month refunds.
+From **Settings > Billing**. Your plan stays active through the end of the current billing period.

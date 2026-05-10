@@ -9,18 +9,18 @@ A Hydra finding is the structured output of an audit. Every finding carries the 
 
 | Field | Type | Description |
 |---|---|---|
-| `id` | string | Unique identifier for this finding. Format: `{repo}-{sequence}`. Used for referencing in Fix, Task, and Linear tickets. |
+| `id` | string | Unique identifier. Format: `HYDRA-{sequence}`. Used for referencing in Fix, Task, and Linear tickets. |
 | `title` | string | One-line description of the issue. |
 | `description` | string | Full explanation of the problem, including why it matters and what the impact is. |
-| `source` | enum | Which step produced this finding: `scanner`, `agent`, or `meta-review`. |
+| `source` | enum | Which step produced this finding: `scanner` or `agent`. |
 
 ## Classification fields
 
 | Field | Type | Valid values | Description |
 |---|---|---|---|
-| `severity` | enum | `critical`, `high`, `medium`, `low`, `info` | How urgent the issue is. Scanner findings are capped at `medium` until LLM-verified. |
+| `severity` | enum | `critical`, `high`, `medium`, `low` | How urgent the issue is. Scanner findings are capped at `medium` until LLM-verified. |
 | `effort` | enum | `trivial`, `small`, `medium`, `large` | Estimated fix complexity. `trivial` = one-line change. `large` = multi-file refactor. |
-| `risk` | enum | `low`, `medium`, `high` | Risk of the fix itself -- the likelihood that resolving this introduces a regression. |
+| `risk` | enum | `low`, `medium`, `high` | Risk of the fix itself — the likelihood that resolving this introduces a regression. |
 | `confidence` | enum | `high`, `medium`, `low` | How confident the analysis is that this is a real issue (not a false positive). |
 
 ## Fix context fields
@@ -29,8 +29,8 @@ These fields are consumed by the Fix and Task agents. They are required for Fix 
 
 | Field | Type | Description |
 |---|---|---|
-| `change_plan` | string | Step-by-step description of how to resolve the finding. Written by the audit agent, reviewed by the meta-review step. |
-| `detection_query` | string | A query or file pattern that can be used to verify the finding still exists before the fix begins. Used in Fix pre-flight. |
+| `change_plan` | string | Step-by-step description of how to resolve the finding. Written by the audit agent. |
+| `detection_query` | string | A query or file pattern used to verify the finding still exists before the fix begins. Used in the detection-query verify gate. |
 | `file_path` | string | Primary file where the issue was identified. |
 | `line_range` | object | `{start, end}` line numbers within `file_path`. Null if the issue spans multiple files or is architectural. |
 
@@ -38,9 +38,8 @@ These fields are consumed by the Fix and Task agents. They are required for Fix 
 
 | Field | Type | Description |
 |---|---|---|
-| `agent_group` | enum | Which of the six agent groups produced this finding: `security`, `code-quality`, `reliability`, `api-data`, `ops`, `ux`. |
-| `tool` | string | The specific skill area within the agent group (e.g., `auth`, `concurrency`, `schema-evolution`). |
-| `novelty_rationale` | string | For `meta-review` source findings only. One sentence explaining why this finding required LLM judgment and was not catchable by deterministic steps. |
+| `category` | enum | Which of the six domain groups produced this finding: `security`, `correctness`, `maintainability`, `performance`, `architecture`, `operations`. |
+| `tool` | string | The specific skill area within the domain group (e.g., `auth`, `concurrency`, `schema-evolution`). |
 | `created_at` | timestamp | When this finding was produced. |
 | `audit_id` | string | The audit run that produced this finding. |
 
@@ -48,17 +47,19 @@ These fields are consumed by the Fix and Task agents. They are required for Fix 
 
 | Field | Type | Valid values | Description |
 |---|---|---|---|
-| `status` | enum | `open`, `in-progress`, `fixed`, `dismissed`, `wont-fix` | Current state of the finding. |
-| `dismissed_reason` | string | Present when `status` is `dismissed` or `wont-fix`. Free-text explanation. Used by Learn to avoid re-proposing dismissed issues. |
+| `status` | enum | `new`, `triaged`, `in_progress`, `closed` | Current state of the finding. |
+| `close_reason` | enum | `fixed`, `ignored`, `expired` | Set when status is `closed`. |
+| `dismissal_category` | enum | `false_positive`, `wont_fix`, `out_of_scope`, `stale`, `other` | Set when dismissed via triage. |
+| `dismissal_note` | string | Required when dismissing. 10–500 characters explaining the dismissal. |
 
 ## Scanner severity cap
 
-Scanner findings (`source: scanner`) are capped at `severity: medium` regardless of the pattern's configured severity. A finding cannot be `high` or `critical` from pattern matching alone -- it must be LLM-verified (via Audit or PR Review LLM mode) to reach those severity levels.
+Scanner findings (`source: scanner`) are capped at `severity: medium` regardless of the pattern's configured severity. A finding cannot be `high` or `critical` from pattern matching alone — it must be LLM-verified to reach those severity levels.
 
 This prevents false positive scanner patterns from generating high-severity noise.
 
 ## Related
 
-- [Audit](/workflows/audit) -- where findings are produced
-- [Fix](/workflows/fix) -- how findings are consumed
-- [The Fix Gauntlet](/concepts/fix-gauntlet) -- how fix context fields are used during execution
+- [Audit](/workflows/audit) — where findings are produced
+- [Fix](/workflows/fix) — how findings are consumed
+- [The Fix Gauntlet](/concepts/fix-gauntlet) — how fix context fields are used during execution
