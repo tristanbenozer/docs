@@ -1,0 +1,66 @@
+---
+title: "Your first audit"
+---
+
+
+# Your first audit
+
+An audit is Hydra reading every file in your repo and surfacing things worth fixing — security holes, broken patterns, untested edge cases, dead code, accessibility gaps, performance traps. Roughly 35 different lenses run in parallel.
+
+## Kick it off
+
+1. Open your repo in the dashboard.
+2. Click **Run audit**.
+3. Pick a depth:
+   - **Fast** (~$1–3, ~5 min) — pattern scanners only. Catches the obvious stuff. Good for a first look or a quick re-check.
+   - **Standard** (~$15–35, ~15–25 min) — scanners *plus* reasoning agents. The agents read code, follow control flow, and reason about your specific architecture. This is what you want for a serious sweep.
+4. Click **Start**.
+
+You can close the tab. The job runs server-side and you'll see results when it's done. Cost shows live as the run progresses.
+
+## While it's running
+
+The job page shows a per-stage progress strip — scanning, then each tool group, then post-processing — and a live cost ticker. If you change your mind, click **Cancel**: any work already done is preserved and partial findings are kept.
+
+You don't need to babysit. Most teams run audits as part of a regular cadence (weekly, or after a release) and check back later.
+
+## Read the findings
+
+When the audit lands you'll see a sorted list of findings. The default sort is by impact — critical security holes float to the top.
+
+Each row shows:
+
+- **Title** — what the issue is, in plain English.
+- **Severity** — critical, high, medium, low.
+- **Category** — security, code quality, reliability, API & data, ops, UX.
+- **Source** — `Agent (LLM)` for findings an agent reasoned about, `SCAN` for fast pattern matches.
+- **File:line** — where it lives.
+
+Click any row for the full description: what's wrong, why it matters, what to do about it, and a code excerpt.
+
+## Triage
+
+For each finding you have four moves:
+
+- **Fix** — open a PR. Hydra spins up an isolated worktree, edits the code, runs your tests, asks a reviewer agent to double-check the diff, and pushes a branch. PR appears in GitHub a few minutes later. Cost: roughly $1–3 per fix.
+- **Ticket** — push it to Linear (or your tracker) so it lives in your normal workflow.
+- **Ignore** — mark it as a false positive, won't-fix, duplicate, or irrelevant. Hydra remembers and won't surface it again. The reason you give also feeds back into Hydra's learning loop, so the system gets quieter over time.
+- **Leave open** — do nothing; come back later.
+
+## Pick something to fix
+
+For your first audit, pick one **high** severity finding in a category you care about and click **Fix**. Watch the gauntlet run:
+
+1. Hydra clones the repo into a temporary worktree.
+2. An agent reads the finding, the file, and the surrounding code.
+3. It writes a patch, formats it, and runs your build/test commands.
+4. A second agent reviews the diff like a senior engineer would.
+5. The branch is pushed and a PR is opened with a `[Hydra]` prefix.
+
+If anything fails — tests break, the diff is too big, the reviewer rejects it — Hydra aborts cleanly. No half-baked PRs.
+
+## What's next
+
+- [**Findings**](../concepts/findings) — severity, categories, source tiers, lifecycle
+- [**Workflows**](../concepts/workflows) — the other jobs Hydra runs
+- [**Discovery**](../concepts/discovery) — make your IDE AI agents smarter

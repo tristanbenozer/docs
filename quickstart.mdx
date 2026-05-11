@@ -1,69 +1,59 @@
 ---
-title: "Quick Start"
-description: "Connect your first repo and close your first Linear ticket automatically. Under 10 minutes."
+title: "Install"
 ---
 
-## 1. Create your account
 
-Sign in at [app.gethydra.ai](https://app.gethydra.ai) using your GitHub account.
+# Install
+
+Getting Hydra running against your codebase takes about ten minutes. There's no CLI, no agent to deploy, no infrastructure on your side — Hydra is a hosted product. You sign in, tell it which GitHub repos it can read, and you're done.
+
+## 1. Sign in
+
+Open the app and sign in with your work account.
+
+- **Hosted:** Hydra is not currently deployed. The hosted apex (`app.<domain>` per env) lands with the [`infra/terraform/`](../technical/infrastructure.md) substrate.
+- **Local dev:** `http://localhost:5173` if you're running the frontend yourself
+
+You'll land on the dashboard. If your team already has a workspace, ask an admin to invite you. If you're the first one in, the workspace is created for you.
 
 ## 2. Install the GitHub App
 
-After signing in, install the Hydra GitHub App on the organization and repositories you want Hydra to scan. Hydra needs read access to your code and write access to open pull requests and post check results.
+Hydra reads code, opens pull requests, and posts review comments via a GitHub App that you authorize on your org or specific repos.
 
-## 3. Add a repository
+1. Go to **Settings → Integrations → GitHub**.
+2. Click **Install Hydra GitHub App**.
+3. On GitHub, pick the org and the repos you want Hydra to access. You can scope it to a handful to start and add more later.
+4. Approve the install. You'll be redirected back to Hydra.
 
-Go to **Repositories** and click **Add repository**. Select the repo and the branch you want Hydra to monitor.
+Hydra never stores GitHub OAuth tokens — every action against your repos uses a short-lived installation token issued by GitHub at request time.
 
-Discovery runs automatically as soon as you add the repo.
+## 3. (Optional) Bring your own Anthropic key
 
-## 4. Discovery runs
+Hydra runs on Claude. By default, every audit, fix, and review runs on Hydra-managed inference (we host Claude on AWS Bedrock and bill you on the Hydra invoice) — there's nothing to configure to start running jobs.
 
-Hydra reads your entire codebase and builds a living knowledge base in `.hydra/`:
+If you'd rather pay Anthropic directly and see your usage on the Anthropic console, you can bring your own key:
 
-- `architecture.md` — how the codebase is structured
-- `conventions.md` — naming patterns, test patterns, API patterns
-- `howto/` — project-specific guides generated from your code
+1. Generate a key at [console.anthropic.com](https://console.anthropic.com).
+2. In Hydra, go to **Settings → API keys**.
+3. Paste the key and save. It's encrypted at rest.
 
-This runs once and takes 10–20 minutes depending on codebase size. You will see progress in the dashboard.
+When a key is configured, we route your audits through Anthropic's API using your key — your billing, your rate limit. Remove the key and we route through Hydra-managed Bedrock again. Either way, Hydra never proxies one tenant's traffic through another tenant's key.
 
-Hydra also opens a pull request to inject a block into your repo's `CLAUDE.md`. Merge it and every developer using Claude Code in that repo gets Hydra's architecture context in every session automatically.
+## 4. Add your first repo
 
-<Info>
-All AI inference runs on AWS Bedrock, managed by Hydra. No API key setup required.
-</Info>
+1. Click **+ Add repo** on the dashboard.
+2. Pick a repo from the list (only ones the GitHub App can see show up).
+3. Optionally pick a non-default branch — repos are tracked as `name@branch`, so you can audit `main` and `develop` independently.
+4. Save.
 
-## 5. Run your first audit
+Hydra immediately runs **discovery** on the repo — a one-time pass that learns the architecture, conventions, and stack. It takes 5–10 minutes and costs about $5–10 in Anthropic usage. Discovery is what makes every later audit and fix actually understand your codebase, so don't skip it.
 
-Once Discovery completes, click **Run Audit**. The audit runs six parallel domain agent groups against your codebase and returns a prioritized list of findings. Each finding includes severity, effort estimate, risk rating, and a change plan.
+## 5. (Optional) Link related repos
 
-Most repos complete in 10–20 minutes. Findings appear in the **Findings** tab sorted by priority.
+If two of your repos relate — a service and its tests, a producer and its consumer, a provider and its schemas — tell Hydra. Open the repo in the app, go to **Related repos**, and add each link with its relationship (`tests`, `shared-schemas`, `consumer`, `provider`, `sibling`).
 
-## 6. Fix your first finding
+Every audit, fix, and review on the linked repo will pick up the related repo's discovery context automatically. This is the single highest-leverage configuration step in the product, and it's free.
 
-Select a finding and click **Fix**. Hydra will:
+## You're ready
 
-1. Run the 11-gate quality gauntlet in an isolated Git worktree
-2. Open a pull request with the fix
-3. Close the Linear ticket on merge
-
-<Check>
-Your first autonomous fix is running. No further action required until you review the PR.
-</Check>
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="How the audit works" icon="magnifying-glass" href="/workflows/audit">
-    Six parallel domain agent groups and what findings contain.
-  </Card>
-  <Card title="The fix gauntlet" icon="shield-check" href="/concepts/fix-gauntlet">
-    The 11 quality gates every fix passes before a PR opens.
-  </Card>
-  <Card title="Govern" icon="git-pull-request" href="/workflows/govern">
-    Automated PR review that runs on every push.
-  </Card>
-  <Card title="Workflow costs" icon="receipt" href="/reference/workflow-costs">
-    Per-workflow compute credit consumption.
-  </Card>
-</CardGroup>
+[Run your first audit →](./first-audit)

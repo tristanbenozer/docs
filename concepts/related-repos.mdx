@@ -1,0 +1,72 @@
+---
+title: "Related repos"
+---
+
+
+# Related repos
+
+**Tell Hydra which repos relate, and every workflow on every repo gets sharper.**
+
+Most engineering systems aren't one repo — they're a service plus its tests plus its consumers plus the schemas everyone shares. Hydra works at the repo level by default, but it can pull in summaries from related repos as context whenever it runs an LLM-driven workflow on yours.
+
+This is the single highest-leverage configuration step in the product, and it's free.
+
+## Relationships
+
+When you link two repos, you label the relationship. The label changes how Hydra interprets the link.
+
+| Relationship | Means | Effect |
+| --- | --- | --- |
+| `tests` | This repo's tests live in the linked repo | Audit/fix know about the test repo; benchmark guardrails relax |
+| `shared-schemas` | The linked repo defines schemas this one uses | Schema/contract findings get cross-repo context |
+| `consumer` | The linked repo consumes this repo's API | Breaking changes get flagged with awareness of the consumer |
+| `provider` | This repo consumes the linked repo's API | Schema/contract findings see the provider's types |
+| `sibling` | Generic relationship — same domain, no contract | Light context; useful for monorepo-adjacent setups |
+
+You can link a repo with multiple relationships if more than one applies.
+
+## What gets injected
+
+For every linked repo, Hydra fetches the linked repo's [discovery](./discovery) bundle (architecture summary plus profile JSON), truncates each piece to keep prompts efficient, and injects it into the LLM context for the workflow that's running.
+
+This applies to:
+
+- [Audit](./audit) — agents read related-repo summaries before reasoning about findings.
+- [Improve](./improve) — same as audit.
+- [Discovery](./discovery) — the bundle written into your repo references the related repos by name.
+- [Fix](./fix) — the fix agent and the reviewer agent both see related-repo context.
+- [Task](./task) — same as fix.
+- [PR review](./pr-review) (LLM mode) — the review agent sees it.
+- [Learn](./learn) — has the context when proposing improvements.
+
+It does **not** apply to publish (deterministic — no LLM), scanner-only audits (no LLM), or scanner-mode PR review.
+
+## The test guardrail
+
+Linking a `tests` relationship has one extra effect worth knowing: it disables the "0 test files → cap output at 2 findings" guardrail that protects against hallucinated test claims in repos that genuinely have no tests. If you're a service repo whose tests live next door, you almost certainly want this link.
+
+## Auto-suggestions
+
+Hydra suggests likely related repos from three signals:
+
+- **Name prefix match.** `payments-api` and `payments-worker` look related.
+- **Discovery cross-references.** If `repo-a`'s discovery names `repo-b`, the link is suggested.
+- **Reverse references.** If `repo-b` already links to `repo-a`, the inverse link is suggested.
+
+Suggestions appear in the **Related repos** tab on each repo. Accepting one is a single click; the relationship and direction are picked for you. You can always edit afterward.
+
+## When to link
+
+- A service and its test repo. Always.
+- A service and its consumer service. Especially if API stability matters.
+- Anything that shares schemas, protobuf, OpenAPI, or types. Always.
+- Two repos in the same domain with overlapping logic. Probably.
+- Two completely unrelated repos. No.
+
+The cost of an extra link is small (a few KB injected into prompts), but spurious links dilute the context window. Be generous with real relationships, conservative with vibes.
+
+## Bidirectional vs one-way
+
+Most relationships are one-directional and Hydra reflects that. `consumer` and `provider` are inverses of each other — linking one direction creates the inverse on the other side automatically. `tests` and `shared-schemas` are typically one-way (the test repo doesn't need to know about the service it tests for *its* audits). `sibling` is symmetric.
+
+You can override any of this manually in the **Related repos** tab.

@@ -1,0 +1,74 @@
+---
+title: "Changelog"
+---
+
+
+# Changelog
+
+High-level, user-facing changes to Hydra. Internal refactors, perf work, and
+plumbing aren't listed here — only things you'd notice in the product.
+
+## May 2026
+
+- **Tools overview page.** New
+  [Concepts → Tools](./concepts/tools.md) page enumerates every audit tool
+  (39 today) grouped by domain. Generated from `tools/<name>/config.yaml` so
+  it tracks the registry instead of drifting.
+- **Self-Improvement filters reworked.** The tool and language filter rows
+  on the Self-Improvement page collapse into compact dropdowns instead of
+  long wrapped chip rows; per-option counts move into the menu labels.
+- **Findings filter labels.** The bare "All" dropdowns on the Findings tab
+  now read "All freshness" and "All sources" so it's obvious what they
+  filter.
+- **Idempotent job submission.** Re-posting the same job (same repo, commit,
+  type, and params) within a short window now returns the existing job instead
+  of starting a duplicate run. Force a fresh run with `?force=true`.
+- **Audit-freshness banner.** Repo detail pages now show a banner when the
+  latest audit is stale relative to the current commit so it's obvious when
+  findings are out of date.
+- **Pre-flight cost preview.** The Audit modal now estimates the run cost
+  before you submit, based on prior runs for the repo.
+- **Findings lifecycle simplified.** Statuses collapsed from six to three —
+  `open`, `in_progress`, `closed` — with a `close_reason` (`fixed`, `ignored`,
+  `expired`) on closed findings. Existing refs and Linear cards keep
+  resolving; filters in the UI changed shape to match.
+- **Discovery output is now scanned for prompt-injection content.** Markdown
+  written to your repo by `discover` (HYDRA.md, `.hydra/discovery/*`) is
+  validated before any file is written. Dangerous patterns (role overrides,
+  shell pipelines like `curl … | sh`, off-allowlist URLs, hidden text) block
+  the publish.
+- **Per-page traffic dashboard** (admin). New `/admin/ui-traffic` page rolls
+  up routed-page mounts across the SPA, split by master-ops vs product
+  traffic.
+
+## April 2026
+
+- **Live findings stream.** During an audit, findings now appear in the UI as
+  the agents find them, instead of only after the run finishes.
+- **`scan` is now its own job type.** The old "audit lite / standard / deep"
+  tier dropdown was retired. Scanner-only runs are now submitted as `scan`;
+  agent runs are `audit`. Choose the workflow up front instead of a depth
+  knob.
+- **`meta_review` job type.** A single Opus pass over an existing audit's
+  findings — useful for a second-opinion review without re-running the full
+  pipeline.
+- **`improve_lite`.** Single-call Opus architectural pass for `improve`
+  workflows; the old "deep" improve tier was retired.
+- **Per-repo test / build command overrides.** Settings → *Fixes & Tickets*
+  now lets you pin the exact commands the fix gauntlet runs for tests and
+  builds, for repos where auto-detection misses (Xcode-only Swift projects,
+  monorepo subdirs, custom Make targets).
+- **Swift support.** Swift is now a first-class language for detection and
+  audit, and shows up in the admin language coverage scorecard.
+- **User menu.** A footer dropdown on every page now has *View profile* and
+  *Log out*.
+- **Per-call LLM cost ledger.** Every Anthropic API call Hydra makes is now
+  logged individually with token breakdown and request id. Visible on the
+  admin LLM Calls page with a 7-day per-day coverage strip; linked from the
+  Job Detail page.
+- **IAM audit log.** Privileged tenant mutations (membership, role changes,
+  API keys) are now recorded to a dedicated audit log.
+- **Cluster-wide concurrency cap** on heavy job types (`audit`, `improve`,
+  `discover`) so a single tenant can't drain the worker pool.
+- **GitHub webhook hardening.** Stricter signature verification, payload-size
+  cap, and a startup warning if `GITHUB_WEBHOOK_SECRET` is missing.

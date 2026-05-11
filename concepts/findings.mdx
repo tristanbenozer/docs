@@ -1,0 +1,100 @@
+---
+title: "Findings"
+---
+
+
+# Findings
+
+A finding is one specific thing in your codebase worth your attention — a SQL injection, a missing index, a flaky test, an unhandled error path, a deprecated dependency. Findings are the primary unit of work in Hydra. Audits produce them, fixes resolve them, tickets track them.
+
+## What's in a finding
+
+Every finding includes:
+
+- **Title** — one sentence stating the problem.
+- **Description** — what's wrong and why it matters. No file paths stuffed inside; just the *why*.
+- **Suggestion** — what to do about it.
+- **File and line** (when applicable) — exactly where it lives.
+- **Code excerpt** — the relevant snippet, syntax-highlighted.
+- **Severity, category, tool, source** — for sorting and filtering.
+- **Ref** — a stable ID like `A-42` (audit) or `I-7` (improve) you can reference in conversations and tickets.
+
+Findings are designed to be readable by both humans and AI agents. If you copy one into Claude Code, Cursor, or a Slack thread, it has everything someone needs to act.
+
+## Severity
+
+| Severity | What it means |
+| --- | --- |
+| **Critical** | Active risk — data exposure, broken auth, production breakage path. Drop everything. |
+| **High** | Significant defect or vulnerability. Schedule this sprint. |
+| **Medium** | Real issue, not urgent. Pick up when convenient. |
+| **Low** | Minor — nits, cosmetic, deferred work. |
+
+Severity is set by the tool that found it and double-checked during post-processing. Scanner findings are capped at medium unless the underlying pattern is explicitly high-confidence.
+
+## Categories
+
+Findings are grouped into six domains so you can scan a category and triage in batches:
+
+- **Security** — auth, injection, secrets, data exposure
+- **Code Quality** — readability, complexity, dead code, refactors
+- **Reliability** — error handling, concurrency, edge cases, tests
+- **API & Data** — schema, contract, validation, database
+- **Ops** — config, deployment, observability, dependencies
+- **UX** — accessibility, frontend perf, error messages
+
+The full list of tools (35+) lives in the audit tool selector — each one is a focused lens.
+
+## Source: agent vs scanner
+
+Findings come from two engines:
+
+- **Agent (LLM)** — a Claude agent read your code, followed the logic, and reasoned about it. High-context, high-confidence, slower. Most findings in a standard audit.
+- **Scanner (SCAN)** — a fast pattern match. No reasoning, just regex and AST checks against a curated pattern library. Cheap and complete, but blunter.
+
+When both engines flag the same thing, the agent finding wins — it has more context. You'll see a `SCAN` badge on scanner-only findings; agent findings show `Agent (LLM)`.
+
+## Lifecycle
+
+A finding moves through these states:
+
+```
+open → ticketed → in_progress → done
+   ↘ ignored
+```
+
+- **open** — newly detected, awaiting triage.
+- **ticketed** — pushed to Linear or your tracker.
+- **in_progress** — a fix PR is open.
+- **done** — resolved (PR merged, or you marked it fixed).
+- **ignored** — false positive, won't-fix, duplicate, or irrelevant. Won't appear again.
+
+Re-audits **merge** with previous results — they don't replace. Open findings get their `last_seen` bumped. Done findings re-open if the issue comes back. Ignored findings stay quiet. Genuinely new issues get added.
+
+## Refs
+
+Findings get sequential refs per repo:
+
+- `A-1`, `A-2`, … — from audits
+- `I-1`, `I-2`, … — from improve runs
+- `L-…` — from learn (self-improvement) runs
+
+Refs are stable across re-audits and PRs. Quote them in commit messages, Linear tickets, or Slack — anyone on the team can paste it into Hydra and find the underlying finding.
+
+## Filters that matter
+
+The findings list supports filtering by severity, category, source, status, and tool. The two filters most teams use:
+
+- **Severity ≥ High** — the "what should I be working on" view.
+- **Source = Agent** — skip the scanner findings while triaging deeply, when you want only the high-context calls.
+
+## Re-running
+
+Re-audit when:
+
+- A release shipped — see what landed.
+- You merged a fix PR — confirm the finding is gone.
+- A week passed — keep the backlog fresh.
+- You changed Hydra's audit configuration — see the delta.
+
+Cost is the same as the first audit; the merge logic ensures you don't see the same thing twice.

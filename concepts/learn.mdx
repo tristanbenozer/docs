@@ -1,0 +1,70 @@
+---
+title: "Learn"
+---
+
+
+# Learn
+
+**Hydra getting better at your codebase, automatically, in the background, with you in the loop.**
+
+After every audit and improve, a learn job runs at the lowest priority. It reads what the tools just did, identifies where they were noisy, missed things, or got the severity wrong, and proposes targeted improvements — sharper scanner patterns, tighter prompts, better category routing. Those proposals never auto-apply. They land in your **Improvements** tab as **virtual patches** for you to review.
+
+Over weeks of use, accepted improvements compound. Hydra's audits on *your* repos get more relevant. False positives drop. Team-specific quirks get encoded into the system. The product gets better at the codebase you actually have, not the average codebase across all customers.
+
+## Virtual patches
+
+A virtual patch is exactly what it sounds like — a proposed edit to one of Hydra's tools (or scanner patterns), stored as a patch object rather than applied directly to source files.
+
+When you accept a virtual patch, it becomes **active**. The next audit on your tenant loads it as an overlay on top of the base tool. The base tool file is never modified. If you reject the patch, accept it and later disable it, or revert it, the overlay disappears and the next audit goes back to the base tool.
+
+This means:
+
+- Accepted improvements take effect immediately on the next audit.
+- Reverting is one click and instant.
+- A bad improvement can't permanently corrupt the system — the worst case is one audit run with the overlay before you turn it off.
+
+## Two tiers
+
+Improvements have two scopes:
+
+- **Tenant** (your workspace). Default. Applied to your audits only. Other Hydra customers don't see them.
+- **Global** (across all Hydra customers). Opt-in via **Settings → Self-improvement → Allow global contributions**. Restricted to scanner patterns only — not prompt edits.
+
+When you opt in to global contributions, your accepted scanner-pattern improvements ship the *mechanical fields* (regex, severity, scope, tool, category) into a shared pool. A separate process re-authors the title and description from scratch on Hydra's side, so no team-specific prose crosses the boundary. Skill items and prompt edits are tenant-only and never globalize.
+
+You can run with global contributions off forever and not lose anything — every improvement still works for your tenant. Global is for teams who want to give back to the pattern library.
+
+## What gets generated
+
+Learn proposes changes in two shapes:
+
+- **Scanner patterns.** New regex / AST patterns to catch a class of issue. Or refinements to existing patterns to drop false positives.
+- **Skill items.** Targeted edits to the prompt of one of Hydra's audit tools — usually adding a "watch out for X" or "don't flag Y" rule that came up in the last audit.
+
+Each proposal arrives with the audit findings that motivated it, so you can see *why* Hydra thinks this improvement is worth making.
+
+## Cost and cadence
+
+- ~$0.50–1.00 per learn job.
+- Triggered automatically after every audit and improve run.
+- Runs at the lowest priority, so it never starves a fix or audit you actually want.
+- Skipped after fast audits and after fix runs (no signal to learn from).
+- Capped by the unified `tenant_budget` row for `scope='learn'` (default $50/mo per tenant, edit via `PATCH /api/admin/budgets/learn`). If you hit the ceiling, learn is logged-and-skipped — your audits still complete normally.
+
+## Staleness sweep
+
+Every audit also runs a sweep that:
+
+- Dismisses improvements that have been pending review for 90+ days.
+- Dismisses improvements with broken regex (introduced after a separate edit).
+- Dismisses improvements that have already been baked into the base tool.
+- Auto-disables active patches that have shown low signal — specifically, ≥10 attributed findings with ≥60% dismissed-as-false-positive rate.
+
+The sweep keeps the improvements list short and useful. You don't have to manually clean it.
+
+## What learn does not do
+
+- It does not edit source files in any of your repos.
+- It does not push branches or open PRs against your code.
+- It does not auto-apply improvements without your acceptance.
+- It does not learn from cancelled or partial-failure jobs (no clean signal).

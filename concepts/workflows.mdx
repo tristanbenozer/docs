@@ -1,0 +1,35 @@
+---
+title: "Workflow overview"
+---
+
+
+# Workflow overview
+
+Hydra's product surface is a small set of jobs you can run against any repo. Each one has a specific job to do; most teams use all of them in a regular cadence.
+
+| Workflow | What it does | Cost | Page |
+| --- | --- | --- | --- |
+| [Audit](./audit) | Find what's worth fixing | $1–35 | Two depths — fast (scanner) or standard (scanner + reasoning agents) |
+| [Improve](./improve) | Find what *could* be better | ~$7–11 | Same engine as audit, looking for upgrades rather than defects |
+| [Fix](./fix) | One finding → one PR | ~$1–10 | 11-step quality gauntlet, isolated worktree, reviewer agent, tests |
+| [Task](./task) | Plain-English directive → PR | ~$1–10 | Same gauntlet as fix, but driven by an instruction instead of a finding |
+| [PR review](./pr-review) | AI on every pull request | ~$1–2.50 | Scanner mode (inline comments) or LLM mode (rolling checklist) |
+| [Discovery](./discovery) | Knowledge bundle into the repo | ~$5–10 | `HYDRA.md` + `.hydra/discovery/` — read by Hydra and your IDE AI |
+| [Learn](./learn) | Hydra getting better at your code | ~$0.50–1.00 | Background — proposes virtual patches you review |
+
+## Cadence most teams use
+
+| When | What |
+| --- | --- |
+| Once, on adding a repo | [Discovery](./discovery) (auto-runs) |
+| Weekly or after each release | [Audit](./audit) (standard) |
+| Whenever you spot a finding worth fixing | [Fix](./fix) |
+| When you have a goal that doesn't map to a finding | [Task](./task) |
+| Quarterly or per planning cycle | [Improve](./improve) |
+| On every PR (automatic) | [PR review](./pr-review) |
+| Quarterly or after a refactor | Re-run [Discovery](./discovery) |
+| Continuously (automatic) | [Learn](./learn) |
+
+## How they fit together
+
+[Findings](./findings) are the unit of work — produced by audit and improve, consumed by fix, tracked through tickets, closed by re-audit. [Discovery](./discovery) is the context layer — its output makes every other workflow on the repo sharper. [Related repos](./related-repos) extend that context across repo boundaries. [Learn](./learn) is the meta layer — it watches the others run and proposes improvements to Hydra itself.

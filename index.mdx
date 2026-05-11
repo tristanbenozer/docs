@@ -1,19 +1,33 @@
 ---
-title: "Hydra Documentation"
-description: "Autonomous code governance for engineering teams."
+title: "Introduction"
 ---
 
-<CardGroup cols={2}>
-  <Card title="Quickstart" icon="bolt" href="/quickstart">
-    Connect your first repo and run your first audit in under 10 minutes.
-  </Card>
-  <Card title="Audit" icon="magnifying-glass" href="/workflows/audit">
-    Full codebase analysis across security, reliability, code quality, and more.
-  </Card>
-  <Card title="Fix" icon="wrench" href="/workflows/fix">
-    Autonomous fix with an 11-step quality gauntlet and a pull request.
-  </Card>
-  <Card title="Learn" icon="brain" href="/workflows/learn">
-    Continuous improvement that makes every future audit smarter.
-  </Card>
-</CardGroup>
+
+# Hydra
+
+**Hydra makes your codebase legible — to the people on your team and to the AI tools they use.**
+
+Connect your repos once. Hydra reads them, finds real problems, opens PRs to fix them, and publishes a knowledge bundle into each repo so Claude Code, Cursor, and Copilot stop guessing about your conventions.
+
+## What you get
+
+- **Real findings, not boilerplate.** Hydra runs both fast pattern scanners and reasoning agents over every file in your repo. Each finding tells you what's wrong, why it matters, where it lives, and what to do about it. Severity, category, and source are surfaced so you can triage by impact instead of reading every line.
+- **PRs, not just tickets.** Click *Fix* on a finding and Hydra spins up an isolated worktree, edits the code, runs your tests, asks a reviewer agent to double-check it, and opens a pull request — gated by an 11-step quality gauntlet so the diff is something you'd actually merge.
+- **Free-form work, the same way.** *Task* takes a plain-English directive ("migrate this service off the deprecated logger") and ships a PR through the same gauntlet — no finding required.
+- **Smarter AI assistants in every repo.** *Discover* writes a `HYDRA.md` and `.hydra/discovery/` bundle into the repo so any AI agent working in it picks up your architecture, conventions, and gotchas automatically. No more pasting context into chat.
+- **PR review on autopilot.** Wire up the GitHub App and Hydra reviews every pull request — scanner-fast or LLM-deep — and posts inline comments or a single rolling checklist that updates across commits.
+- **Cross-repo intelligence.** Tell Hydra which repos relate (tests, shared schemas, providers, consumers) and every workflow gets that context for free.
+
+## Who this is for
+
+Engineering teams who already use AI coding tools and want a system that operates *across* repos rather than one editor session at a time. Hydra is designed to be the always-on counterpart to your IDE assistant — surfacing problems and shipping fixes while you sleep, and quietly making your existing tools sharper at the same time.
+
+## Where to next
+
+- [**Install**](./getting-started/install) — connect a repo and configure access
+- [**First audit**](./getting-started/first-audit) — kick off your first run and read the results
+- [**Workflow overview**](./concepts/workflows) — the jobs Hydra runs (audit, improve, fix, task, review, discover, learn)
+- [**Findings**](./concepts/findings) — severity, categories, source tiers, lifecycle
+- [**Audit**](./concepts/audit) · [**Improve**](./concepts/improve) · [**Fix**](./concepts/fix) · [**Task**](./concepts/task) · [**PR review**](./concepts/pr-review) — the per-workflow detail pages
+- [**Discovery**](./concepts/discovery) — the knowledge bundle Hydra writes into your repo
+- [**Related repos**](./concepts/related-repos) — give every workflow cross-repo context

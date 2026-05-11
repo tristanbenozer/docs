@@ -1,0 +1,69 @@
+---
+title: "Audit"
+---
+
+
+# Audit
+
+**An audit is Hydra reading every file in your repo and surfacing things worth fixing.** Security holes, broken patterns, untested edge cases, dead code, accessibility gaps, performance traps. Around 35 specialized lenses run in parallel — six domains (Security, Code Quality, Reliability, API & Data, Ops, UX) covering the kinds of problems engineering teams care about in real codebases.
+
+It is the workflow most teams run most often, and the one most other workflows build on.
+
+## How it works
+
+Two engines run side by side and their findings are merged into a single sorted list:
+
+- **Scanners.** Fast pattern matchers — regex and AST checks against a curated library that grows over time. Cheap, complete, blunt.
+- **Reasoning agents.** Claude agents that read your code, follow control flow, and reason about your specific architecture. High-context, high-confidence, slower.
+
+When the same issue is flagged by both, the agent finding wins and the scanner finding is dropped. After the engines run, a post-processing pass verifies findings against the actual code, rejects false positives, merges duplicates, and corrects mis-located lines. What lands in your inbox is what survived all of that.
+
+## Two depths
+
+| Mode | Cost | Wall time | What runs |
+| --- | --- | --- | --- |
+| **Fast** | ~$1–3 | ~5 min | Scanners + post-processing only |
+| **Standard** | ~$15–35 | ~15–25 min | Scanners + reasoning agents + post-processing |
+
+Fast is right for first looks, quick re-checks, and "is this branch worse than the one I came from" sanity passes. Standard is what you want for serious sweeps — it's where the agent reasoning earns its keep.
+
+There is no "deeper than standard" knob you can turn — depth is the engine, not the prompt. If you want a tighter sweep on one area, narrow the tool selection instead of paying for more thinking.
+
+## Reading the results
+
+Findings come back sorted by impact: critical security issues float to the top, low-severity nits fall to the bottom. Each row shows the title, severity, category, source (`Agent (LLM)` or `SCAN`), and `file:line`. Click any row for the full description, the suggestion, and a syntax-highlighted excerpt.
+
+The two filters most teams reach for first:
+
+- **Severity ≥ High** — the "what should I be working on" view.
+- **Source = Agent** — skip the scanner findings while triaging deeply, when you want only the high-context calls.
+
+Each finding gets a stable ref (`A-1`, `A-2`, …) you can quote in commit messages, tickets, and Slack. Refs survive re-audits.
+
+For everything you can do with a finding once it's in front of you, see [Findings](./findings).
+
+## Re-auditing
+
+Re-audits **merge** with previous results — they don't replace them. Open findings get their `last_seen` timestamp bumped. Done findings re-open if the issue comes back. Ignored findings stay quiet. Genuinely new issues get added. So running an audit a second time costs the same as the first, but you don't pay for the same triage work twice.
+
+Sensible cadences:
+
+- **Weekly**, or after each release. Catches what landed.
+- **After merging a fix PR.** Confirms the finding is gone and surfaces anything the change introduced.
+- **After a refactor.** A standard audit on the new shape often surfaces things that were always true but newly visible.
+
+## What audit does not do
+
+- It does not edit your code. Fixes go through the [Fix](./fix) workflow.
+- It does not file tickets automatically. Triage decides what's worth tracking.
+- It does not auto-update Hydra's own tools. Improvements proposed by the [Learn](./learn) loop wait for your review.
+
+## Cost notes
+
+Standard audits sit in the $15–35 range on most repos. Three things move the dial:
+
+- **Repo size.** More files = more reading. Most of the cost is input tokens, not output.
+- **Agent verbosity.** Cached prefixes keep this in check, but a chatty model on a large repo can push the upper end.
+- **Related repos.** Each linked repo adds a small amount of context to every agent group. Worth it — see [Related repos](./related-repos) — but not free.
+
+Cost displays live as the run progresses, so you can cancel before you blow a budget. Cancellation preserves any partial findings.

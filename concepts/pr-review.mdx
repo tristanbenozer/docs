@@ -1,0 +1,70 @@
+---
+title: "PR review"
+---
+
+
+# PR review
+
+**Hydra reviews every pull request in your repo automatically, the moment it's opened, and again on every push.**
+
+Once the GitHub App is installed, no further setup is required. Reviews appear on every PR — from your team, from contractors, from Dependabot, from Hydra itself. The review posts on the PR within a couple of minutes of the push.
+
+## Two modes
+
+You pick one mode per repo, in **Settings → PR review**.
+
+### Scanner mode
+
+Pattern-based, fast, cheap. Around **$1–2 per PR**.
+
+The scanner runs over the diff, identifies suspicious lines using the same pattern library that powers a fast audit, and posts **inline comments** on the relevant lines. Each comment names the issue and the suggested fix. No reasoning, no context — just the patterns Hydra knows.
+
+Right for high-velocity repos where most PRs are small and you want a fast safety net without an LLM bill on every push.
+
+### LLM mode
+
+Full agent reasoning. Around **$1–2.50 per PR**.
+
+A single Claude agent reads the diff in context with the rest of the repo and any [related repos](./related-repos), then posts **a single rolling checklist comment** on the PR. As the author pushes more commits, the comment updates in place — you never have to scroll through stale review threads to find the latest state.
+
+The agent is capped at 7 findings per review, ranked by impact. Each finding is tiered:
+
+- **Must fix** — block merge until addressed.
+- **Consider** — advisory; reviewer's call.
+
+Right for repos where the cost of merging a bad change is higher than the cost of an LLM review — services in production, libraries that other repos depend on, anything user-facing.
+
+## How tiers behave
+
+You can wire **must fix** findings to your branch protection rules so they actually block merge. The Hydra review posts a check status that GitHub recognizes; configure it in your repo's branch protection settings the same way you'd configure any required check.
+
+**Consider** findings post as part of the same checklist comment but never block. They're suggestions for the reviewer to evaluate.
+
+## What the review sees
+
+Both modes have access to:
+
+- The PR diff (full file context, not just the patch).
+- The base branch's existing code.
+- Your repo's [discovery bundle](./discovery), if you've published one.
+- Summaries of any [related repos](./related-repos) you've linked.
+
+The discovery context is the single biggest quality lift. A repo with discovery published gets reviews that respect your conventions; a repo without one gets generic best-practice advice. If you're going to wire up PR review, run discovery first.
+
+## When the review runs
+
+- **On PR open** — first review.
+- **On every subsequent push** — review re-runs. The previous review's findings are tracked in hidden JSON inside the comment, so the new review sees what was already raised and folds in only what changed.
+- **On PRs Hydra itself opens** ([fix](./fix), [task](./task)) — yes, Hydra reviews its own PRs, with the same gauntlet you'd review them with.
+
+## Cost notes
+
+- **Scanner mode** is roughly fixed cost per PR — pattern matching is cheap.
+- **LLM mode** scales with diff size more than repo size, because the diff is what the agent reads first. A 5,000-line PR review will cost more than a 50-line PR review.
+- **Bot PRs** (Dependabot, Renovate) get the same treatment as human PRs. If you want to skip them, exclude the bot users in **Settings → PR review → Skip authors**.
+
+## What PR review does *not* do
+
+- It doesn't auto-merge anything.
+- It doesn't push commits to the PR's branch. (If you want changes, click [Fix](./fix) on a finding or open a [task](./task).)
+- It doesn't dismiss reviews after a fix — that's a GitHub action, intentionally left to the human reviewer.

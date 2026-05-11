@@ -1,0 +1,35 @@
+---
+title: "Improve"
+---
+
+
+# Improve
+
+**Audit asks "what's broken?" Improve asks "what could be better?"**
+
+Improve runs the same agent system as a [standard audit](./audit), but the agents are looking for upgrades rather than defects: refactors that would simplify a tangled module, modernizations that would replace a deprecated dependency, performance wins, better-tested versions of currently fragile code, abstractions worth introducing, abstractions worth deleting.
+
+The output is the same shape as audit — a list of findings — but with `I-…` refs and a different feel when you read them. Less "fix this", more "consider this."
+
+## When to run it
+
+Run improve once you've worked through the obvious audit findings and you want to know what *could* be better, not just what's broken. Good triggers:
+
+- A backlog of audit findings has been worked down.
+- You're scoping next quarter's investment in a service.
+- A team is about to adopt a codebase they didn't write.
+- You're evaluating "where does this codebase need love."
+
+It is **not** a replacement for audit. Defects and security issues live in audit; improvements live in improve. Most teams run audit weekly and improve quarterly or per planning cycle.
+
+## What it costs
+
+Roughly $7–11 per run. Cheaper than a standard audit because the scanner pass is skipped — improve is agent-only.
+
+## Shipping an improvement
+
+Click **Fix** on any improve finding and it goes through the same [fix gauntlet](./fix) as an audit fix: isolated worktree, agent edit, tests, reviewer, PR. The only difference is the ref prefix and the shape of the change — improvements tend to be larger, so the gauntlet's diff-size guard rejects more often. If a single improvement is too large to fit the gauntlet, break it into smaller [tasks](./task).
+
+## Refs
+
+Improve findings get sequential `I-1`, `I-2`, … refs per repo. They are stable across re-runs and PRs. Use them in commit messages, Linear tickets, and team chat — anyone on the team can paste the ref into Hydra and find the finding.

@@ -17,28 +17,24 @@
             "group": "Get started",
             "pages": [
               "index",
-              "quickstart"
-            ]
-          },
-          {
-            "group": "Workflows",
-            "pages": [
-              "workflows/discovery",
-              "workflows/audit",
-              "workflows/fix",
-              "workflows/task",
-              "workflows/improve",
-              "workflows/govern",
-              "workflows/pr-review"
+              "quickstart",
+              "first-audit"
             ]
           },
           {
             "group": "Concepts",
             "pages": [
-              "concepts/fix-gauntlet",
-              "concepts/three-step-analysis",
-              "concepts/virtual-patches",
-              "concepts/byok"
+              "concepts/workflows",
+              "concepts/findings",
+              "concepts/audit",
+              "concepts/improve",
+              "concepts/fix",
+              "concepts/task",
+              "concepts/pr-review",
+              "concepts/discovery",
+              "concepts/related-repos",
+              "concepts/learn",
+              "concepts/tools"
             ]
           },
           {
@@ -47,7 +43,8 @@
               "reference/plans-pricing",
               "reference/workflow-costs",
               "reference/finding-fields",
-              "reference/hydra-directory"
+              "reference/hydra-directory",
+              "changelog"
             ]
           }
         ]

@@ -1,0 +1,68 @@
+---
+title: "Fix"
+---
+
+
+# Fix
+
+**Click *Fix* on any finding and Hydra opens a pull request that resolves it.**
+
+Fix is the workflow that turns a triaged finding into a real branch on GitHub, with tests passing, the lint clean, and a senior-engineer-style review already done. The diff that lands in the PR is something you'd actually merge — or it doesn't get pushed in the first place.
+
+## What happens when you click Fix
+
+The fix pipeline runs in an isolated git worktree on Hydra's worker, top to bottom, with no manual handoffs:
+
+1. **Worktree.** Hydra clones your repo at the current commit into a throwaway directory. Your working tree on GitHub is never touched until the final push.
+2. **Test baseline.** Your existing test suite is run *before* any edits, so Hydra knows which tests are red on your `main` and won't be blamed for them.
+3. **Agent edit.** A Claude agent reads the finding, the file, the surrounding code, and any [related repos](./related-repos) you've linked, then writes a patch.
+4. **Diff size guard.** A patch over 20 files or 2,000 lines is rejected as too large to land safely. Break the change into smaller [tasks](./task) instead.
+5. **Test regression gate.** The full suite runs again. Any test that was green on baseline and is now red is a hard block — Hydra aborts rather than ship a regression.
+6. **Build.** Your build command runs.
+7. **Auto-format.** Your formatter runs (Prettier, Black, gofmt — whatever the repo uses).
+8. **Lint.** Your linter runs.
+9. **Scanner quality loop.** A targeted scanner pass looks for common defects in the diff itself. If it finds something, the agent gets one chance to address it. Up to two iterations.
+10. **Reviewer agent.** A separate Claude agent reviews the diff like a senior engineer — focused on correctness, edge cases, and whether the fix actually addresses the finding. If it pushes back, the original agent gets one revision pass.
+11. **Post-fix audit + push.** A narrow re-audit confirms the original finding is actually gone, then the branch is pushed and a `[Hydra]`-prefixed PR is opened.
+
+If anything in steps 4–10 fails terminally, Hydra aborts cleanly. **You never get a half-baked PR.** You get either a real, reviewed change or a clear note about what stopped it.
+
+## Cost
+
+| Path | Cost |
+| --- | --- |
+| Clean fix, no revisions | ~$1–3 |
+| Reviewer kicks back, revision lands | ~$3–6 |
+| Worst case (revision + re-review) | ~$5–10 |
+
+Aborted fixes cost less because the gauntlet stops early. There's no "wasted half-fix" charge for an abort that finds the change doesn't fit.
+
+## Per-repo command overrides
+
+Hydra auto-detects build and test commands from your repo's package metadata, but auto-detection misses for Xcode-only Swift repos, monorepo subdirectories, and custom Make targets. If yours is one of those, set explicit commands in **Settings → Fixes & Tickets**:
+
+- **Test command override** — what the gauntlet runs for steps 2 and 5.
+- **Build command override** — what runs in step 6.
+
+Set these once per repo. The gauntlet will use them instead of guessing.
+
+## Reviewer tiers
+
+The reviewer agent picks one of two tiers based on the finding's category:
+
+- **Standard** (8 review tools) for findings touching API contracts, auth, validation, schema, or database changes — places where a wrong fix has serious blast radius.
+- **Quick** (4 review tools) for everything else.
+
+You don't pick the tier; the system does, based on the finding's category.
+
+## When fix won't be the right tool
+
+- **The change spans many files.** The 20-file / 2,000-line guard exists for good reason — large mechanical migrations are better as multiple smaller fixes or as a [task](./task) you can scope yourself.
+- **The finding has no concrete location.** Repo-wide architectural findings are easier to act on through a [task](./task) directive than through fix.
+- **Tests don't pass on baseline.** If your `main` is red before Hydra touches anything, the regression gate has nothing to compare against. Get tests green first.
+
+## What you keep control of
+
+The PR is yours — Hydra opens it, you review and merge it (or close it). Hydra never force-pushes, never amends commits in PRs you've reviewed, and never enables auto-merge. The `[Hydra]` prefix is on the PR title and the branch name (`hydra/fix-…`) so they're easy to filter in GitHub.
+
+If you want a fix to clean itself up after merging the PR (delete the branch), that's a GitHub setting on your repo. Hydra doesn't touch branch protection or merge policies.

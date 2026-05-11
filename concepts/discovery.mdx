@@ -1,0 +1,73 @@
+---
+title: "Discovery"
+---
+
+
+# Discovery
+
+Discovery is Hydra reading your repo and writing down everything an AI agent should know about it — the architecture, the conventions, the gotchas, the "we always do it this way" rules — and committing that knowledge into the repo as a bundle any AI agent can read.
+
+It's the single most leveraged thing Hydra does. Every audit, fix, and review on the repo gets sharper because it picks up the discovery context. And critically, *your* AI tools — Claude Code, Cursor, Copilot, Cline, anything that respects `CLAUDE.md` or reads files in the working tree — get the same lift, for free.
+
+## What gets written into your repo
+
+After discovery and publish complete, you'll find these files in your repo:
+
+```
+HYDRA.md                              ← top-level architecture & domain summary
+.hydra/
+  discovery/
+    architecture.md                   ← how the system is laid out
+    principles.md                     ← design rules the team follows
+    patterns.md                       ← conventions, idioms, naming
+    conventions.md                    ← deterministic file/lint conventions
+    done.md                           ← what "done" looks like (tests, CI, etc.)
+    howto/
+      <slug>.md                       ← per-area how-tos for new contributors
+.cursorignore
+.claudeignore
+```
+
+Hydra also injects a `Hydra Context` section into your existing `CLAUDE.md` (or creates one if it doesn't exist), pointing AI agents at the bundle.
+
+You commit these files like any other documentation. They're not generated artifacts — they're the canonical "how this codebase works" explanation, written in prose, scoped to *your* repo.
+
+## What's in it
+
+Discovery tries to write the doc you wish a senior engineer had handed you on day one. Concretely:
+
+- **Architecture** — the major components, how data flows between them, what each layer owns.
+- **Principles** — the design rules that aren't obvious from the code. ("We never do X, because…")
+- **Patterns** — naming conventions, file layout, idioms, recurring abstractions.
+- **How-tos** — short guides for the most common changes. ("Adding a new endpoint", "Wiring a new feature flag".)
+- **Done** — the team's definition of done. Tests, lint, CI gates, version bumps.
+- **Conventions** — file-level rules picked up deterministically from your repo (linters, formatters, type checkers).
+
+The output is prose, not configuration. Bullet points, headers, real sentences. Designed to be read by a person and treated as authoritative by an AI.
+
+## Why this changes how you work
+
+Most AI coding tools are fast at the keystroke level but lose context on the codebase level. They guess at conventions, hallucinate file paths, and re-discover the same architecture every session.
+
+Once Hydra publishes a discovery bundle into your repo, every Claude Code or Cursor session walks in pre-loaded with the architecture, the rules, and the gotchas. The quality lift on routine tasks is immediate and obvious — fewer "actually, we don't do it that way" rounds.
+
+It's also the input Hydra's *own* agents read before every audit, fix, and review. So discovery makes both your team's tools and Hydra itself smarter at your codebase, in lockstep.
+
+## Cross-repo context
+
+If you've linked related repos, discovery picks up summaries of each linked repo and weaves them into the bundle. A consumer service knows about its provider's schemas. A test repo knows about the system under test. This is automatic once the link is configured.
+
+## Running discovery
+
+Discovery runs automatically the first time you add a repo. After that, re-run it when:
+
+- The repo's architecture meaningfully changed (new service, big refactor).
+- You added or removed a major dependency.
+- New team conventions emerged that should be canonical.
+- It's been a while — quarterly is a reasonable cadence.
+
+Cost is roughly $5–10 per run. The output replaces the previous bundle with a fresh, current version.
+
+## Publish
+
+Publish is the deterministic step that takes Hydra's discovery output and writes it into your repo as a commit on a branch. No LLM runs at publish time — it's a file copy with care taken not to clobber edits you've made by hand. You can review the diff like any other PR before merging.
